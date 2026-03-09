@@ -429,7 +429,7 @@ export default function CartPanel({ cart = [], setCart }) {
         const paymentRes = await api.post(
           "/admin-dashboard/create-payment-link",
           {
-            amount: Math.round(total * 100),
+            amount: Math.round(total * 1),
             name: customer.name,
             phone: customer.phone,
           },
@@ -1309,7 +1309,7 @@ const printReceipt = (order) => {
 
   <body>
 
-  <h3>HAMSINI STORE</h3>
+  <h3>Sri Devi Herbals </h3>
   <p style="text-align:center;">Thank You Visit Again</p>
 
   <hr>
@@ -1359,7 +1359,7 @@ const printReceipt = (order) => {
 
   <hr>
 
-  <p style="text-align:center;">Powered by HAMSINI POS</p>
+  <p style="text-align:center;">Powered by Sri Devi Herbals POS</p>
 
   </body>
   </html>
