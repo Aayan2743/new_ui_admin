@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 export default function VariationModal({ open, product, onClose, onConfirm }) {
   const [selected, setSelected] = useState(null);
 
+   console.log("Variants:", product?.variants);
   useEffect(() => {
     if (!open) setSelected(null);
   }, [open]);

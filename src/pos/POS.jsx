@@ -131,6 +131,8 @@ const searchByBarcode = async (code) => {
 
 const addVariantToCart = (product, variant) => {
 
+
+    console.log("Variant data:", variant);
   if (variant.stock <= 0) {
     alert("Out of stock");
     return;
@@ -214,6 +216,7 @@ const handleBarcodeKeyDown = (e) => {
 
   /* ================= OPEN VARIATION MODAL ================= */
   const handleProductClick = (product) => {
+    console.log("Product clicked:", { product });
     setSelectedProduct(product);
     setOpenModal(true);
   };
