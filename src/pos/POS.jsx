@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState,useRef } from "react";
 import CategoryPills from "./components/CategoryPills";
 import ProductCard from "./components/ProductCard";
 import CartPanel from "./CartPanel";
@@ -6,6 +6,12 @@ import VariationModal from "./components/VariationModal";
 import api from "../api/axios";
 
 export default function POS() {
+
+
+
+  const barcodeInputRef = useRef(null);
+const [barcode, setBarcode] = useState("");
+
   const [openSearch, setOpenSearch] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [searchResults, setSearchResults] = useState([]);
@@ -31,6 +37,163 @@ export default function POS() {
   );
 
   /* ================= LOAD CATEGORIES ================= */
+
+
+  useEffect(() => {
+  barcodeInputRef.current?.focus();
+}, []);
+
+// useEffect(() => {
+//   let timer;
+
+//   const handleKeyDown = (e) => {
+//     if (e.key === "Enter") {
+//       searchByBarcode(barcode);
+//       setBarcode("");
+//       return;
+//     }
+
+//     if (/^[0-9]$/.test(e.key)) {
+//       setBarcode((prev) => prev + e.key);
+
+//       clearTimeout(timer);
+
+//       timer = setTimeout(() => {
+//         setBarcode("");
+//       }, 100);
+//     }
+//   };
+
+//   window.addEventListener("keydown", handleKeyDown);
+
+//   return () => {
+//     window.removeEventListener("keydown", handleKeyDown);
+//   };
+// }, [barcode]);
+
+
+// const searchByBarcode = async (code) => {
+//   try {
+//     const res = await api.get(`/admin-dashboard/product/product-by-barcode/${code}`);
+
+//     const product = res.data;
+//     const variant = product.variants[0];
+
+//     const productData = {
+//       id: product.id,
+//       name: product.name
+//     };
+
+//     setSelectedProduct(productData);
+
+//     // pass product manually
+//     addVariantToCart(productData, variant);
+
+//   } catch (err) {
+//     console.log("Barcode not found");
+//   }
+// };
+
+
+const searchByBarcode = async (code) => {
+  try {
+
+    const res = await api.get(
+      `/admin-dashboard/product/product-by-barcode/${code}`
+    );
+
+    const product = res.data;
+    const variant = product.variants[0];
+
+    const productData = {
+      id: product.id,
+      name: product.name
+    };
+
+    setSelectedProduct(productData);
+
+    addVariantToCart(productData, variant);
+
+  } catch (err) {
+
+    // 🔴 Handle barcode not found
+    if (err.response?.data?.message === "Barcode not found") {
+      alert("❌ Barcode not found");
+      return;
+    }
+
+    // Other errors
+    alert("Something went wrong");
+    console.error(err);
+  }
+};
+
+
+const addVariantToCart = (product, variant) => {
+
+  if (variant.stock <= 0) {
+    alert("Out of stock");
+    return;
+  }
+
+  setCart((prev) => {
+    const index = prev.findIndex(
+      (i) =>
+        i.product_id === product.id &&
+        i.variation_id === variant.id
+    );
+
+    if (index !== -1) {
+      if (prev[index].qty >= variant.stock) {
+        alert("Stock limit reached");
+        return prev;
+      }
+
+      const updated = [...prev];
+      updated[index].qty += 1;
+      return updated;
+    }
+
+    return [
+      ...prev,
+      {
+        product_id: product.id,
+        product_name: product.name,
+        variation_id: variant.id,
+        variation_name: variant.name,
+        price: variant.price,
+        stock: variant.stock,
+        qty: 1,
+      },
+    ];
+  });
+};
+
+// const handleBarcodeChange = (e) => {
+//   const value = e.target.value;
+
+//   if (value.length >= 8) { // barcode length
+//     searchByBarcode(value);
+//     setBarcode("");
+//   } else {
+//     setBarcode(value);
+//   }
+// };
+
+const handleBarcodeKeyDown = (e) => {
+  if (e.key === "Enter") {
+    const code = e.target.value.trim();
+
+    if (!code) return;
+
+    searchByBarcode(code);
+    setBarcode("");
+
+    setTimeout(() => barcodeInputRef.current?.focus(), 50);
+  }
+};
+
+
   useEffect(() => {
     api
       .get("/admin-dashboard/list-category-all")
@@ -157,7 +320,13 @@ export default function POS() {
   };
 
   return (
+
+
+    
     <div className="h-screen flex bg-gray-100">
+
+
+
       {/* LEFT PANEL */}
       <div className="flex-1 flex flex-col p-4 gap-4">
         {/* CATEGORY FILTER */}
@@ -175,6 +344,26 @@ export default function POS() {
             🔍 Search Product
           </button>
         </div>
+
+
+        <div className="flex justify-between items-center">
+<input
+  ref={barcodeInputRef}
+  value={barcode}
+  onChange={(e)=>setBarcode(e.target.value)}
+  onKeyDown={handleBarcodeKeyDown}
+  placeholder="Scan barcode..."
+  className="border p-2 rounded-lg w-64"
+  autoFocus
+/>
+
+  {/* <button
+    onClick={() => setOpenSearch(true)}
+    className="px-4 py-2 bg-black text-white rounded-lg"
+  >
+    🔍 Search Product
+  </button> */}
+</div>
 
         {/* PRODUCTS GRID */}
         <div className="flex-1 grid grid-cols-6 gap-1 overflow-y-auto">
@@ -224,6 +413,9 @@ export default function POS() {
           </div>
         )}
       </div>
+
+
+     
 
       {openSearch && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">

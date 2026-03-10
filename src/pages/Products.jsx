@@ -207,6 +207,20 @@ export default function Products() {
             Search
           </button>
 
+
+          <button
+  onClick={() => {
+    setSearch("");
+    setQuery("");
+    setPage(1);
+  }}
+  className="px-4 py-2 bg-red-100 border rounded-lg text-sm"
+>
+  Reset
+</button>
+
+
+
           <button
             onClick={() => setOpenAdd(true)}
             className="bg-indigo-600 text-white px-4 py-2 rounded-lg"

@@ -293,6 +293,7 @@ export default function CartPanel({ cart = [], setCart }) {
         product_id: item.product_id,
         variant_id: item.variation_id,
         qty: item.qty,
+          barcode_id: item.barcode_id ?? null
       })),
     };
 
@@ -384,6 +385,7 @@ export default function CartPanel({ cart = [], setCart }) {
           setPendingPayload(payload);
           setPendingId(otpRes.data.pending_id);
           setShowOtpModal(true);
+           setOtp(otpRes.data.otp);
           alert("OTP sent to WhatsApp");
         } else {
           alert(otpRes?.data?.message || "Unexpected response");
@@ -493,7 +495,7 @@ export default function CartPanel({ cart = [], setCart }) {
     }
   };
 
-  const handleManualPaymentSuccess = async () => {
+  const handleManualPaymentSuccess_123 = async () => {
     try {
       setLoading(true);
 
@@ -520,6 +522,44 @@ export default function CartPanel({ cart = [], setCart }) {
       setLoading(false);
     }
   };
+
+  const handleManualPaymentSuccess = async () => {
+  try {
+    setLoading(true);
+
+    const orderRes = await api.post(
+      "/admin-dashboard/pos/create-order",
+      pendingPayload
+    );
+
+    if (orderRes.data.success) {
+
+      const order = orderRes.data.data;
+
+      alert(`Order Created: ${order.invoice_number}`);
+
+      // 🔥 PRINT RECEIPT
+      printReceipt(order);
+
+      setCart([]);
+      setShowOtpModal(false);
+      setOtp("");
+      setPendingPayload(null);
+      setShowPaymentDone(false);
+
+    } else {
+      alert(orderRes.data.message);
+    }
+
+  } catch (err) {
+    console.log(err.response?.data);
+    alert("Order creation failed");
+  } finally {
+    setLoading(false);
+  }
+};
+
+
   return (
     <div className="w-96 bg-white border-l flex flex-col h-screen">
       {/* HEADER */}
@@ -1072,7 +1112,7 @@ export default function CartPanel({ cart = [], setCart }) {
               className="w-full border rounded px-3 py-2 text-center"
               disabled={loading}
             />
-
+            
             <div className="flex justify-between">
               <button
                 onClick={() => setShowOtpModal(false)}
@@ -1268,105 +1308,120 @@ function Row({ label, value }) {
 }
 
 const printReceipt = (order) => {
-  const receiptWindow = window.open("", "PRINT", "height=600,width=300");
+  const content = `
+  <div class="receipt">
+    <h3>Sri Devi Herbals</h3>
+    <p class="center">Thank You Visit Again</p>
 
-  receiptWindow.document.write(`
+    <hr>
+
+    <p>Invoice : ${order.invoice_number}</p>
+
+    <hr>
+
+    <table>
+      ${(order.items || [])
+        .map(
+          (item) => `
+        <tr>
+          <td>${item.product_name}</td>
+          <td class="right">${item.qty}</td>
+          <td class="right">₹${item.total}</td>
+        </tr>
+      `
+        )
+        .join("")}
+    </table>
+
+    <hr>
+
+    <table>
+      <tr>
+        <td>Subtotal</td>
+        <td class="right">₹${order.subtotal}</td>
+      </tr>
+
+      <tr>
+        <td>GST</td>
+        <td class="right">₹${order.tax_total}</td>
+      </tr>
+
+      <tr>
+        <td><b>Total</b></td>
+        <td class="right"><b>₹${order.grand_total}</b></td>
+      </tr>
+    </table>
+
+    <hr>
+
+    <p class="center">Powered by Sri Devi Herbals POS</p>
+  </div>
+  `;
+
+  const printFrame = document.createElement("iframe");
+  printFrame.style.position = "fixed";
+  printFrame.style.right = "0";
+  printFrame.style.bottom = "0";
+  printFrame.style.width = "0";
+  printFrame.style.height = "0";
+  printFrame.style.border = "0";
+
+  document.body.appendChild(printFrame);
+
+  const doc = printFrame.contentWindow.document;
+
+  doc.open();
+  doc.write(`
   <html>
   <head>
-  <style>
-    body{
-      font-family: monospace;
-      width:78mm;
-      padding:10px;
-    }
+    <style>
 
-    h3{
-      text-align:center;
-      margin:0;
-    }
+      body{
+        font-family: monospace;
+        width:78mm;
+        margin:0;
+        padding:10px;
+      }
 
-    table{
-      width:100%;
-      font-size:12px;
-    }
+      .center{
+        text-align:center;
+      }
 
-    td{
-      padding:2px 0;
-    }
+      table{
+        width:100%;
+        font-size:12px;
+      }
 
-    .right{
-      text-align:right;
-    }
+      td{
+        padding:3px 0;
+      }
 
-    hr{
-      border:none;
-      border-top:1px dashed black;
-      margin:6px 0;
-    }
+      .right{
+        text-align:right;
+      }
 
-  </style>
+      hr{
+        border:none;
+        border-top:1px dashed black;
+        margin:6px 0;
+      }
+
+    </style>
   </head>
 
   <body>
-
-  <h3>Sri Devi Herbals </h3>
-  <p style="text-align:center;">Thank You Visit Again</p>
-
-  <hr>
-
-  <p>
-  Invoice : ${order.invoice_number}
-  </p>
-
-  <hr>
-
-  <table>
-
-  ${(order.items || [])
-    .map(
-      (item) => `
-    <tr>
-      <td>${item.product_name}</td>
-      <td class="right">${item.qty}</td>
-      <td class="right">₹${item.total}</td>
-    </tr>
-  `,
-    )
-    .join("")}
-
-  </table>
-
-  <hr>
-
-  <table>
-
-    <tr>
-      <td>Subtotal</td>
-      <td class="right">₹${order.subtotal}</td>
-    </tr>
-
-    <tr>
-      <td>GST</td>
-      <td class="right">₹${order.tax_total}</td>
-    </tr>
-
-    <tr>
-      <td><b>Total</b></td>
-      <td class="right"><b>₹${order.grand_total}</b></td>
-    </tr>
-
-  </table>
-
-  <hr>
-
-  <p style="text-align:center;">Powered by Sri Devi Herbals POS</p>
-
+    ${content}
   </body>
+
   </html>
   `);
 
-  receiptWindow.document.close();
-  receiptWindow.focus();
-  receiptWindow.print();
-  receiptWindow.close();
+  doc.close();
+
+  printFrame.contentWindow.focus();
+  printFrame.contentWindow.print();
+
+  setTimeout(() => {
+    document.body.removeChild(printFrame);
+  }, 1000);
 };

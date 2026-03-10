@@ -23,10 +23,68 @@ export default function BulkVariantImages() {
   const [previewVariantImages, setPreviewVariantImages] = useState({});
   const [previewProductImages, setPreviewProductImages] = useState({});
 
+  const [barcodePopup,setBarcodePopup] = useState(false);
+const [barcodeList,setBarcodeList] = useState([]);
+
   const [uploading, setUploading] = useState(false);
 
   /* ================= FETCH ================= */
 
+
+  const openBarcodePopup = (variant) => {
+
+  setBarcodeList(variant.barcodes || []);
+  setBarcodePopup(true);
+
+};
+
+const closeBarcodePopup = () => {
+  setBarcodePopup(false);
+};
+
+
+const printBarcode = async (variantId) => {
+
+  const res = await api.get(`/admin-dashboard/product/print-barcode/${variantId}`, {
+    responseType: "text"
+  });
+
+  const tspl = res.data;
+
+  sendToPrinter(tspl);
+};
+
+const sendToPrinter = async (tspl) => {
+
+  try {
+
+    if (!window.qz) {
+      alert("QZ Tray not loaded");
+      return;
+    }
+
+    if (!qz.websocket.isActive()) {
+      await qz.websocket.connect();
+    }
+
+      //  const printers = await qz.printers.find();
+
+    const printer = await qz.printers.find("4BARCODE 4B-2054TB"); 
+        console.log("Available printers:", printer);
+
+        
+    const config = qz.configs.create(printer);
+
+    await qz.print(config, [tspl]);
+
+  } catch (error) {
+
+    console.error("Print error:", error);
+    alert("Printer error");
+
+  }
+
+};
   const fetchVariants = async () => {
     try {
 
@@ -131,6 +189,29 @@ export default function BulkVariantImages() {
   };
 
   /* ================= UPLOAD ================= */
+const generateBarcode = async () => {
+
+  try {
+
+    const res = await api.get(
+      `/admin-dashboard/product/generate-old-barcodes`
+    );
+
+    alert(res.data.message || "Barcodes generated");
+
+    fetchVariants(); // refresh table
+
+  } catch (err) {
+
+    console.error(err);
+    alert("Failed to generate barcodes");
+
+  }
+
+};
+
+
+
 
   const uploadImages = async () => {
 
@@ -230,6 +311,16 @@ export default function BulkVariantImages() {
     Reset
   </button>
 
+
+
+
+    <button
+    onClick={() => generateBarcode()}
+    className="bg-yellow-100 px-3 py-1 rounded text-xs"
+  >
+    Generate
+  </button>
+
 </div>
 
       </div>
@@ -248,6 +339,8 @@ export default function BulkVariantImages() {
               <th className="px-4 py-3">Product</th>
               <th className="px-4 py-3">Variant</th>
               <th className="px-4 py-3">SKU</th>
+              <th className="px-4 py-3">Qty</th>
+              <th className="px-4 py-3">Barcodes</th>
               <th className="px-4 py-3">Product Images</th>
               <th className="px-4 py-3">Variant Images</th>
               <th className="px-4 py-3">Upload</th>
@@ -285,6 +378,31 @@ export default function BulkVariantImages() {
                 <td className="px-4 py-3">
                   {v.sku}
                 </td>
+                <td className="px-4 py-3">
+                  {v.qty ?? "-"}
+                </td>
+
+              <td className="px-4 py-3">
+
+  <div className="flex gap-2">
+
+    <button
+      onClick={() => openBarcodePopup(v)}
+      className="bg-indigo-100 px-3 py-1 rounded text-xs"
+    >
+      View
+    </button>
+
+    <button
+      onClick={() => printBarcode(v.id)}
+      className="bg-green-100 px-3 py-1 rounded text-xs"
+    >
+      Print
+    </button>
+
+  </div>
+
+</td>
 
                 {/* PRODUCT IMAGES */}
 
@@ -516,6 +634,51 @@ export default function BulkVariantImages() {
         </button>
 
       </div>
+
+
+      {barcodePopup && (
+
+  <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+
+    <div className="bg-white p-6 rounded-xl w-[400px] max-h-[500px] overflow-auto">
+
+      <div className="flex justify-between items-center mb-4">
+
+        <h2 className="font-semibold">
+          Barcodes
+        </h2>
+
+        <button
+          onClick={closeBarcodePopup}
+          className="text-red-500"
+        >
+          ✕
+        </button>
+
+      </div>
+
+      <div className="space-y-2 text-sm">
+
+        {barcodeList.length === 0 && (
+          <p>No barcodes</p>
+        )}
+
+        {barcodeList.map((b,i)=>(
+          <div
+            key={i}
+            className="border px-3 py-2 rounded"
+          >
+            {b}
+          </div>
+        ))}
+
+      </div>
+
+    </div>
+
+  </div>
+
+)}
 
     </div>
 
