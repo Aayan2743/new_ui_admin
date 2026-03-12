@@ -164,20 +164,50 @@ export default function ManualOrders() {
     );
   };
 
+  // const getCustomerTypeBadge = (order) => {
+  //   const isNormal = isNormalCustomer(order);
+  //   return (
+  //     <span
+  //       className={`px-3 py-1 rounded-full text-xs font-semibold ${
+  //         isNormal
+  //           ? "bg-purple-100 text-purple-700 border border-purple-300"
+  //           : "bg-cyan-100 text-cyan-700 border border-cyan-300"
+  //       }`}
+  //     >
+  //       {isNormal ? "Walk-in" : "On-Call"}
+  //     </span>
+  //   );
+  // };
+
+
   const getCustomerTypeBadge = (order) => {
-    const isNormal = isNormalCustomer(order);
-    return (
-      <span
-        className={`px-3 py-1 rounded-full text-xs font-semibold ${
-          isNormal
-            ? "bg-purple-100 text-purple-700 border border-purple-300"
-            : "bg-cyan-100 text-cyan-700 border border-cyan-300"
-        }`}
-      >
-        {isNormal ? "Walk-in" : "On-Call"}
-      </span>
-    );
-  };
+
+  const type = order?.order_from;
+
+  let label = "N/A";
+  let style = "bg-gray-100 text-gray-600 border border-gray-300";
+
+  if (type === "whatsapp") {
+    label = "WhatsApp";
+    style = "bg-green-100 text-green-700 border border-green-300";
+  }
+
+  if (type === "On-Call") {
+    label = "On-Call";
+    style = "bg-cyan-100 text-cyan-700 border border-cyan-300";
+  }
+
+  if (type === "walk-in") {
+    label = "Walk-in";
+    style = "bg-purple-100 text-purple-700 border border-purple-300";
+  }
+
+  return (
+    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${style}`}>
+      {label}
+    </span>
+  );
+};
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -320,9 +350,9 @@ export default function ManualOrders() {
                     <td className="px-4 py-3 font-medium text-gray-900">{order.invoice_number}</td>
                     <td className="px-4 py-3 text-gray-700">{order.customer_name}</td>
                     <td className="px-4 py-3 text-gray-700">{order.customer_phone}</td>
-                    <td className="px-4 py-3">{getCustomerTypeBadge(order)}</td>
+                    <td className="px-4 py-3">{getCustomerTypeBadge(order)} </td>
                     <td className="px-4 py-3 font-semibold text-gray-900">₹ {parseFloat(order.grand_total).toFixed(2)}</td>
-                    <td className="px-4 py-3">{getStatusBadge(order.status)}</td>
+                    <td className="px-4 py-3">{getStatusBadge(order.status)} </td>
                     <td className="px-4 py-3 text-gray-600">
                       {new Date(order.created_at).toLocaleDateString("en-IN")}
                     </td>

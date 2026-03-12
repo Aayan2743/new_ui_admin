@@ -150,7 +150,7 @@ export default function CartPanel({ cart = [], setCart }) {
         alert("Payment Received");
 
         const orderRes = await api.post(
-          "/admin-dashboard/pos/create-order",
+          "/admin-dashboard/pos/create-order-oncall",
           pendingPayload,
         );
 

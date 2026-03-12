@@ -1,115 +1,4 @@
-// import { useEffect, useState } from "react";
-// import api from "../api/axios";
 
-// export default function OrdersPage() {
-//   const [orders, setOrders] = useState([]);
-//   const [stats, setStats] = useState({});
-//   const [loading, setLoading] = useState(true);
-
-//   const [status, setStatus] = useState("all");
-//   const [search, setSearch] = useState("");
-//   const [page, setPage] = useState(1);
-
-//   const perPage = 10;
-
-//   /* ================= LOAD DATA ================= */
-
-//   const loadOrders = async () => {
-//     setLoading(true);
-//     const res = await api.get("/cart/online-orders", {
-//       params: { status, search, page, perPage },
-//     });
-//     setOrders(res.data.data || []);
-//     setLoading(false);
-//   };
-
-//   const loadStats = async () => {
-//     const res = await api.get("/cart/online-orders/stats");
-//     setStats(res.data.data);
-//   };
-
-//   useEffect(() => {
-//     loadOrders();
-//     loadStats();
-//   }, [status, search, page]);
-
-//   return (
-//     <div className="space-y-6">
-//       {/* ================= HEADER ================= */}
-//       <div className="flex justify-between">
-//         <h1 className="text-2xl font-semibold">Orders</h1>
-//       </div>
-
-//       {/* ================= STATS ================= */}
-//       <div className="grid grid-cols-4 gap-4">
-//         <Stat title="Total orders" value={stats.totalOrders} />
-//         <Stat title="Total revenue" value={`₹${stats.totalRevenue || 0}`} />
-//         <Stat title="Pending orders" value={stats.pendingOrders} />
-//         <Stat title="Completed orders" value={stats.completedOrders} />
-//       </div>
-
-//       {/* ================= TABS ================= */}
-//       <div className="flex gap-3 border-b pb-2">
-//         {["all", "placed", "completed"].map((s) => (
-//           <button
-//             key={s}
-//             onClick={() => {
-//               setStatus(s);
-//               setPage(1);
-//             }}
-//             className={`px-3 py-1 rounded ${
-//               status === s ? "bg-indigo-100 text-indigo-700" : "text-gray-500"
-//             }`}
-//           >
-//             {s.toUpperCase()}
-//           </button>
-//         ))}
-//       </div>
-
-//       {/* ================= SEARCH ================= */}
-//       <input
-//         type="text"
-//         placeholder="Search order..."
-//         className="border px-3 py-2 rounded"
-//         onChange={(e) => setSearch(e.target.value)}
-//       />
-
-//       {/* ================= TABLE ================= */}
-//       <div className="bg-white rounded-xl overflow-x-auto">
-//         <table className="min-w-full text-sm">
-//           <thead className="bg-gray-100">
-//             <tr>
-//               <th className="px-4 py-3">Order ID</th>
-//               <th>Items</th>
-//               <th>Total</th>
-//               <th>Payment</th>
-//               <th>Status</th>
-//             </tr>
-//           </thead>
-
-//           <tbody>
-//             {orders.map((o) => (
-//               <tr key={o.id} className="border-t">
-//                 <td className="px-4 py-3">#{o.id}</td>
-//                 <td>{o.items.length}</td>
-//                 <td>₹{o.total_amount}</td>
-//                 <td>{o.payment_status}</td>
-//                 <td>{o.order_status}</td>
-//               </tr>
-//             ))}
-//           </tbody>
-//         </table>
-//       </div>
-//     </div>
-//   );
-// }
-
-// const Stat = ({ title, value }) => (
-//   <div className="bg-white p-4 rounded-xl border">
-//     <p className="text-xs text-gray-500">{title}</p>
-//     <p className="text-xl font-semibold">{value}</p>
-//   </div>
-// );
 
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
@@ -338,7 +227,7 @@ export default function OrdersPage() {
                 <td className="px-4 py-3 font-medium">#{o.id}</td>
                 <td className="px-4 py-3">{o.user?.phone || "-"}</td>
                 <td className="px-4 py-3 text-gray-500">
-                  {new Date(o.createdAt).toLocaleString()}
+                  {new Date(o.created_at).toLocaleString()}
                 </td>
                 <td className="px-4 py-3 text-right font-medium">
                   ₹{o.total_amount}
@@ -346,7 +235,7 @@ export default function OrdersPage() {
                 <td className="px-4 py-3">Self Billed</td>
                 <td className="px-4 py-3">
                   <span className="bg-yellow-100 text-yellow-700 text-xs px-3 py-1 rounded-full">
-                    {o.order_status.toUpperCase()}
+                  {(o.order_status || "placed").toUpperCase()}
                   </span>
                 </td>
                 <td className="px-4 py-3 text-center">
