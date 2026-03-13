@@ -88,6 +88,8 @@ export default function StepBasic({ setStep, setProductId }) {
   };
 
   const handleSubmit = async () => {
+    if (loading) return; // prevent double request
+
     if (!form.name || !form.category_id) {
       alert("Required fields missing");
       return;
@@ -112,8 +114,12 @@ export default function StepBasic({ setStep, setProductId }) {
 
       setProductId(res.data?.product?.id);
       setStep(2);
-    } catch {
-      alert("Something went wrong");
+    } catch (err) {
+      if (err.response?.status === 422) {
+        alert(err.response.data.errors);
+      } else {
+        alert("Something went wrong");
+      }
     } finally {
       setLoading(false);
     }
