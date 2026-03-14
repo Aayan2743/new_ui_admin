@@ -171,6 +171,50 @@ export default function CartPanel({ cart = [], setCart }) {
     }
   };
 
+
+
+const resetCartPanel = () => {
+
+  setCart([]);
+
+  setCustomer({
+    name: "",
+    phone: ""
+  });
+
+  setSelectedCustomer(null);   // ⭐ IMPORTANT
+  setPendingPhone("");
+
+  setAddresses([]);
+  setSelectedAddress(null);
+  setShowNewAddress(false);
+
+  setNewAddress({
+    door_no: "",
+    street: "",
+    area: "",
+    address_line: "",
+    city: "",
+    state: "",
+    pincode: ""
+  });
+
+  setDiscount(0);
+  setPaymentMode("pay");
+
+  setGivenAmount("");
+  setBalance(0);
+
+  setOtp("");
+  setPendingPayload(null);
+  setPendingId(null);
+
+  setShowOtpModal(false);
+  setShowPaymentDone(false);
+
+  setOrderHistory([]);
+};
+
   /* ================= SUBMIT ================= */
 
   const handleSubmit = async () => {
@@ -507,11 +551,13 @@ export default function CartPanel({ cart = [], setCart }) {
       if (orderRes.data.success) {
         alert(`Order Created: ${orderRes.data.data.invoice_number}`);
 
-        setCart([]);
-        setShowOtpModal(false);
-        setOtp("");
-        setPendingPayload(null);
-        setShowPaymentDone(false);
+        // setCart([]);
+        // setShowOtpModal(false);
+        // setOtp("");
+        // setPendingPayload(null);
+        // setShowPaymentDone(false);
+
+        resetCartPanel();
       } else {
         alert(orderRes.data.message);
       }

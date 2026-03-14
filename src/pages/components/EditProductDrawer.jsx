@@ -70,7 +70,11 @@ export default function EditProductDrawer({ open, onClose, productId }) {
       <div className="fixed inset-0 z-[9999] flex">
         {/* ================= LEFT SIDEBAR 20% ================= */}
         <div className="w-[20%] bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 text-white p-8 flex flex-col shadow-2xl">
-          <h2 className="text-2xl font-semibold mb-2">Edit Product dfdf</h2>
+
+
+          <h2 className="text-2xl font-semibold mb-2">
+  Edit Product {product?.name ? `- ${product.name}` : ""}
+</h2>
           <p className="text-sm text-white/80 mb-10">
             Step {step} of {STEPS.length}
           </p>

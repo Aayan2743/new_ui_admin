@@ -5,6 +5,13 @@ import api from "../api/axios";
 export default function ManualOrders() {
   const navigate = useNavigate();
 
+const [ratePage, setRatePage] = useState(1);
+const ratePerPage = 5;
+
+const [showRateModal, setShowRateModal] = useState(false);
+const [rates, setRates] = useState([]);
+const [rateLoading, setRateLoading] = useState(false);
+
   const [orders, setOrders] = useState([]);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
@@ -31,6 +38,41 @@ export default function ManualOrders() {
   useEffect(() => {
     fetchOrders();
   }, [page, search, filterStatus, filterType]);
+
+
+
+
+const fetchRates = async (order) => {
+
+  console.log("Fetching rates for order ID:", order);
+  try {
+   setError(null);  
+    setSelectedOrder(order);  
+    setRateLoading(true);
+    setShowRateModal(true);
+
+    const res = await api.post("/admin-dashboard/rate-card", {
+      order_id: order.id
+    });
+
+    if (!res.data.success) {
+      setError(res.data.message);
+      setRates([]);
+      return;
+    }
+
+    setRates(res.data.data.data || []);
+
+  } catch (err) {
+
+    setError(err.response?.data?.message || "Failed to fetch courier rates");
+
+  } finally {
+
+    setRateLoading(false);
+
+  }
+};
 
   const fetchOrders = async () => {
     try {
@@ -209,6 +251,74 @@ export default function ManualOrders() {
   );
 };
 
+const shipNow = async (orderId, courierId) => {
+
+
+  // alert("Shipping with courier ID: " + orderId);
+
+  // return;
+  try {
+
+    const res = await api.post("/admin-dashboard/assign-courier", {
+      order_id: orderId,
+      courier_id: courierId
+    });
+
+    if (res.data.success) {
+
+      setSuccess("Courier assigned successfully");
+      setShowRateModal(false);
+      fetchOrders();
+
+    } else {
+
+      setError(res.data.message);
+
+    }
+
+  } catch (err) {
+
+    console.log(err.response?.data);
+
+    setError(
+      err.response?.data?.message ||
+      "Failed to assign courier"
+    );
+
+  }
+
+};
+
+
+const resetCourier = async (orderId) => {
+
+  try {
+
+    const res = await api.post(`/admin-dashboard/reset-courier/${orderId}`);
+
+    if(res.data.success){
+
+      setSuccess("Courier removed successfully");
+
+      fetchOrders();
+
+    }
+
+  } catch (err){
+
+    setError("Failed to remove courier");
+
+  }
+
+};
+
+const indexOfLastRate = ratePage * ratePerPage;
+const indexOfFirstRate = indexOfLastRate - ratePerPage;
+
+const currentRates = rates.slice(indexOfFirstRate, indexOfLastRate);
+
+const totalRatePages = Math.ceil(rates.length / ratePerPage);
+
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       {/* Header */}
@@ -358,22 +468,44 @@ export default function ManualOrders() {
                     </td>
                     <td className="px-4 py-3 text-gray-700">{order?.Employee || "—"}</td>
                     <td className="px-4 py-3 flex gap-2">
-                      <button
-                        onClick={() => navigate(`/calling/order/${order.id}`)}
-                        className="px-3 py-1 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg text-xs font-medium transition"
-                      >
-                        View
-                      </button>
 
-                      {order.status === "created" && !isNormalCustomer(order) && (
-                        <button
-                          onClick={() => openCourierModal(order)}
-                          className="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-xs font-medium transition"
-                        >
-                          Courier
-                        </button>
-                      )}
-                    </td>
+  <button
+    onClick={() => navigate(`/calling/order/${order.id}`)}
+    className="px-3 py-1 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg text-xs font-medium transition"
+  >
+    View
+  </button>
+
+  {/* Step 1: Send courier */}
+  {order.status === "created" && !isNormalCustomer(order) && (
+    <button
+      onClick={() => openCourierModal(order)}
+      className="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-xs font-medium transition"
+    >
+      Courier
+    </button>
+  )}
+
+  {/* Step 2: After shipped show rate card */}
+  {order.status === "shipped" && (
+    <button
+      onClick={() => fetchRates(order)}
+      className="px-3 py-1 bg-purple-500 hover:bg-purple-600 text-white rounded-lg text-xs font-medium transition"
+    >
+      Rate Card
+    </button>
+  )}
+
+  {order.status === "shipped" && (
+  <button
+    onClick={() => resetCourier(order.id)}
+    className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white rounded-lg text-xs"
+  >
+    Remove Courier
+  </button>
+)}
+
+</td>
                   </tr>
                 ))}
               </tbody>
@@ -519,6 +651,123 @@ export default function ManualOrders() {
           </div>
         </div>
       )}
+
+      {showRateModal && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4">
+    <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl">
+
+      <div className="px-6 py-4 border-b flex justify-between items-center">
+        <h3 className="text-lg font-semibold">Courier Rate Card</h3>
+        <button onClick={() => setShowRateModal(false)}>✕</button>
+      </div>
+
+      <div className="p-6">
+
+        {rateLoading && (
+          <div className="text-center py-10">Loading courier rates...</div>
+        )}
+
+          {error && (
+  <div className="mb-4 p-3 bg-red-100 text-red-700 rounded">
+    {error}
+  </div>
+)}
+
+        {!rateLoading && (
+
+
+
+          <table className="w-full text-sm">
+            <thead className="bg-gray-100">
+              <tr>
+                <th className="px-4 py-3 text-left">Courier Partner</th>
+                <th className="px-4 py-3 text-left">Estimated Delivery</th>
+                <th className="px-4 py-3 text-left">Chargeable Weight</th>
+                <th className="px-4 py-3 text-left">Charges</th>
+                <th className="px-4 py-3 text-left">Action</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {currentRates.map((courier) => (
+                <tr key={courier.id} className="border-b">
+
+                  <td className="px-4 py-4 flex items-center gap-3">
+                    <img src={courier.image} className="w-10 h-10 object-contain"/>
+                    <div>
+                      <div className="font-semibold">{courier.name}</div>
+                      <div className="text-xs text-gray-500">Domestic</div>
+                    </div>
+                  </td>
+
+                  <td className="px-4 py-4">
+                    {courier.estimated_delivery || "--"}
+                  </td>
+
+                  <td className="px-4 py-4">
+                    {courier.minimum_chargeable_weight}
+                  </td>
+
+                  <td className="px-4 py-4 font-semibold">
+                    ₹ {courier.total_charges.toFixed(2)}
+                  </td>
+
+                  <td className="px-4 py-4">
+                 <button
+                    onClick={() => shipNow(selectedOrder.tracking_number, courier.id)}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg text-xs"
+                  >
+                    Ship Now  {selectedOrder.tracking_number } - {courier.id}
+                  </button>
+                  </td>
+
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+
+        {totalRatePages > 1 && (
+  <div className="mt-6 flex justify-center items-center gap-2">
+
+    <button
+      onClick={() => setRatePage(Math.max(1, ratePage - 1))}
+      disabled={ratePage === 1}
+      className="px-3 py-1 border rounded disabled:opacity-50"
+    >
+      ← Prev
+    </button>
+
+    {Array.from({ length: totalRatePages }, (_, i) => i + 1).map((p) => (
+      <button
+        key={p}
+        onClick={() => setRatePage(p)}
+        className={`px-3 py-1 rounded ${
+          ratePage === p
+            ? "bg-blue-600 text-white"
+            : "border"
+        }`}
+      >
+        {p}
+      </button>
+    ))}
+
+    <button
+      onClick={() => setRatePage(Math.min(totalRatePages, ratePage + 1))}
+      disabled={ratePage === totalRatePages}
+      className="px-3 py-1 border rounded disabled:opacity-50"
+    >
+      Next →
+    </button>
+
+  </div>
+)}
+
+      </div>
+
+    </div>
+  </div>
+)}
     </div>
   );
 }
