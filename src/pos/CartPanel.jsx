@@ -4,6 +4,11 @@ import api from "../api/axios";
 export default function CartPanel({ cart = [], setCart }) {
   /* ================= CUSTOMER ================= */
 
+
+  console.log("Cart Items:", cart);
+
+  const [deliveryFee, setDeliveryFee] = useState(0);
+
   const [paymentLinkId, setPaymentLinkId] = useState(null);
 
   const [givenAmount, setGivenAmount] = useState("");
@@ -45,6 +50,8 @@ export default function CartPanel({ cart = [], setCart }) {
   //   state: "",
   //   pincode: "",
   // });
+
+  
 
   const [newAddress, setNewAddress] = useState({
     door_no: "",
@@ -119,7 +126,9 @@ export default function CartPanel({ cart = [], setCart }) {
     return (subtotal * gstPercent) / 100;
   }, [subtotal, gstEnabled, gstPercent]);
 
-  const total = Math.max(subtotal + gst - discount, 0);
+  // const total = Math.max(subtotal + gst - discount, 0);
+
+  const total = Math.max(subtotal + gst + Number(deliveryFee) - discount, 0);
 
   /* ================= QTY ================= */
   const increaseQty = (index) => {
@@ -159,6 +168,8 @@ export default function CartPanel({ cart = [], setCart }) {
 
           printReceipt(order);
 
+      window.location.reload();
+      
           setCart([]);
           setShowPaymentDone(false);
           setPendingPayload(null);
@@ -170,6 +181,12 @@ export default function CartPanel({ cart = [], setCart }) {
       alert("Failed to check payment");
     }
   };
+
+
+  const productDiscount = useMemo(
+  () => cart.reduce((sum, item) => sum + (item.discount || 0) * item.qty, 0),
+  [cart]
+);
 
 
 
@@ -314,6 +331,7 @@ const resetCartPanel = () => {
       subtotal: subtotal,
       discount_total: discount,
       tax_total: gst,
+      delivery_fee: deliveryFee,
       grand_total: total,
 
       customer_name: customer.name,
@@ -344,28 +362,7 @@ const resetCartPanel = () => {
     try {
       setLoading(true);
 
-      // ✅ NORMAL CUSTOMER (Walk-in) - Direct Payment
-      // if (!isOnCallCustomer) {
-      //   console.log("NORMAL CUSTOMER - Creating payment link directly...");
-
-      //   const paymentRes = await api.post(
-      //     "/admin-dashboard/create-payment-link",
-      //     {
-      //       amount: total,
-      //       name: customer.name,
-      //       phone: customer.phone,
-      //     },
-      //   );
-
-      //   if (paymentRes.data.success) {
-      //     alert("Payment link sent to customer phone");
-      //     setPendingPayload(payload);
-      //     setShowPaymentDone(true);
-      //     console.log("Payment Link:", paymentRes.data.payment_link);
-      //   } else {
-      //     alert(paymentRes.data.message || "Failed to create payment link");
-      //   }
-      // }
+   
 
       // NORMAL CUSTOMER
       if (!isOnCallCustomer) {
@@ -383,6 +380,10 @@ const resetCartPanel = () => {
             console.log("ORDER DETAILS:", order);
 
             printReceipt(orderRes.data.data);
+
+            console.log("Receipt printed, resetting cart panel...",orderRes.data.data);
+
+            // window.location.reload();
             setCart([]);
             setGivenAmount("");
             setBalance(0);
@@ -490,20 +491,7 @@ const resetCartPanel = () => {
           console.log("Payment Link:", paymentRes.data.payment_link);
         }
 
-        // const orderRes = await api.post(
-        //   "/admin-dashboard/pos/create-order",
-        //   pendingPayload,
-        // );
-
-        // if (orderRes.data.success) {
-        //   alert(`Order Created: ${orderRes.data.data.invoice_number}`);
-        //   setCart([]);
-        //   setShowOtpModal(false);
-        //   setOtp("");
-        //   setPendingPayload(null);
-        // } else {
-        //   alert(orderRes.data.message);
-        // }
+      
       } else {
         alert(verifyRes.data.message);
       }
@@ -539,35 +527,7 @@ const resetCartPanel = () => {
     }
   };
 
-  const handleManualPaymentSuccess_123 = async () => {
-    try {
-      setLoading(true);
 
-      const orderRes = await api.post(
-        "/admin-dashboard/pos/create-order",
-        pendingPayload,
-      );
-
-      if (orderRes.data.success) {
-        alert(`Order Created: ${orderRes.data.data.invoice_number}`);
-
-        // setCart([]);
-        // setShowOtpModal(false);
-        // setOtp("");
-        // setPendingPayload(null);
-        // setShowPaymentDone(false);
-
-        resetCartPanel();
-      } else {
-        alert(orderRes.data.message);
-      }
-    } catch (err) {
-      console.log(err.response?.data);
-      alert("Order creation failed");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleManualPaymentSuccess = async () => {
   try {
@@ -586,6 +546,16 @@ const resetCartPanel = () => {
 
       // 🔥 PRINT RECEIPT
       printReceipt(order);
+
+  
+
+
+       setCustomer({
+        name: "",
+        phone: "",
+      });
+
+      window.location.reload();
 
       setCart([]);
       setShowOtpModal(false);
@@ -624,52 +594,7 @@ const resetCartPanel = () => {
               setCustomer((p) => ({ ...p, phone: val }));
             }
 
-            // if (val.length === 10) {
-            //   try {
-            //     setSearchLoading(true);
-            //     const res = await api.get(
-            //       `/admin-dashboard/pos/search-user?phone=${val}`,
-            //     );
-
-            //     if (res.data.success) {
-            //       const user = res.data.data;
-
-            //       setSelectedCustomer(user);
-
-            //       setCustomer((p) => ({
-            //         ...p,
-            //         name: user.name,
-            //       }));
-
-            //       setOrderHistory(user.orders || []);
-            //       // ✅ USE ADDRESSES FROM SAME RESPONSE
-            //       if (user.addresses && user.addresses.length > 0) {
-            //         setAddresses(user.addresses);
-            //         setSelectedAddress(user.addresses[0].id);
-            //         setShowNewAddress(false);
-            //       } else {
-            //         setAddresses([]);
-            //         setSelectedAddress(null);
-            //         setShowNewAddress(true);
-            //       }
-            //     } else {
-            //       setSelectedCustomer(null);
-            //       setAddresses([]);
-            //       setShowNewAddress(false);
-
-            //       if (!showAddCustomerPopup) {
-            //         setPendingPhone(val);
-            //         setShowAddCustomerPopup(true);
-            //       }
-            //     }
-            //   } catch {
-            //     setSelectedCustomer(null);
-            //     setAddresses([]);
-            //     setShowNewAddress(false);
-            //   } finally {
-            //     setSearchLoading(false);
-            //   }
-            // }
+           
 
             if (val.length === 10) {
               try {
@@ -1023,11 +948,34 @@ const resetCartPanel = () => {
             key={i}
             className="border rounded-xl p-3 flex justify-between items-center"
           >
-            <div>
+            {/* <div>
               <p className="font-medium text-sm">{item.product_name}</p>
               <p className="text-xs text-gray-500">{item.variation_name}</p>
-              <p className="text-sm mt-1 font-semibold">₹ {item.price}</p>
-            </div>
+              <p className="text-sm mt-1 font-semibold">₹ SDSDSDSAD {item.price}</p>
+              <p className="text-sm mt-1 font-semibold">₹ {item.MRP}</p>
+              <p className="text-sm mt-1 font-semibold">₹ {item.discount}</p>
+            </div> */}
+
+      <div>
+  <p className="font-medium text-sm">{item.product_name}</p>
+  <p className="text-xs text-gray-500">{item.variation_name}</p>
+
+  <p className="text-sm mt-1 font-semibold text-green-700">
+    ₹ {item.price}
+  </p>
+
+  {item.mrp && (
+    <p className="text-xs text-gray-400 line-through">
+      ₹ {item.mrp}
+    </p>
+  )}
+
+  {item.discount > 0 && (
+    <p className="text-xs text-red-500">
+      Discount: ₹ {item.discount}
+    </p>
+  )}
+</div>
 
             <div className="flex items-center gap-2">
               <button
@@ -1053,7 +1001,7 @@ const resetCartPanel = () => {
         <Row label="Subtotal" value={`₹ ${subtotal.toFixed(2)}`} />
 
         <div className="flex justify-between items-center">
-          <span>Discount</span>
+          <span>Bill Discount</span>
           <input
             type="number"
             min={0}
@@ -1062,6 +1010,26 @@ const resetCartPanel = () => {
             className="w-24 border rounded px-2 py-1 text-right"
           />
         </div>
+
+        <div className="flex justify-between items-center">
+  <span>Delivery Fee</span>
+
+  <input
+    type="number"
+    min={0}
+    value={deliveryFee}
+    onChange={(e) => setDeliveryFee(Number(e.target.value))}
+    className="w-24 border rounded px-2 py-1 text-right"
+  />
+</div>
+
+
+        <div className="flex justify-between items-center">
+  <span>Product Discount</span>
+  <span className="text-red-600 font-semibold">
+    ₹ {productDiscount.toFixed(2)}
+  </span>
+</div>
 
         <Row label="GST" value={`₹ ${gst.toFixed(2)}`} />
         <Row label="Total" value={`₹ ${total.toFixed(2)}`} />
@@ -1354,120 +1322,340 @@ function Row({ label, value }) {
 }
 
 const printReceipt = (order) => {
-  const content = `
-  <div class="receipt">
-    <h3>Sri Devi Herbals</h3>
-    <p class="center">Thank You Visit Again</p>
 
-    <hr>
+console.log("PRINTING RECEIPT FOR ORDER:", order);
 
-    <p>Invoice : ${order.invoice_number}</p>
+const dateTime = order.created_at
+  ? new Date(order.created_at).toLocaleString()
+  : new Date().toLocaleString();
 
-    <hr>
+let customer = order.shipping_address_snapshot || {};
 
-    <table>
-      ${(order.items || [])
-        .map(
-          (item) => `
-        <tr>
-          <td>${item.product_name}</td>
-          <td class="right">${item.qty}</td>
-          <td class="right">₹${item.total}</td>
-        </tr>
-      `
-        )
-        .join("")}
-    </table>
+const customerName = customer.name || "Walk-in Customer";
+const customerPhone = customer.phone || "-";
 
-    <hr>
+// alert(customer.name)
 
-    <table>
+console.log("Customer Info for Receipt:", customer);
+
+
+
+
+const address = [
+customer.address,
+customer.city,
+customer.state,
+customer.pincode
+]
+.filter(Boolean)
+.join(", ");
+
+
+
+
+
+
+const itemsHtml = (order.items || [])
+.map((item) => {
+
+  const name =
+    item.product_name.length > 18
+      ? item.product_name.substring(0, 18) + ".."
+      : item.product_name;
+
+  const qty = Number(item.qty ?? item.quantity ?? 1);
+  const discountPerItem = Number(item.total_discount ?? 0);
+  const total = Number(item.total ?? 0);
+
+  const lineDiscount = discountPerItem ;
+  const lineAmount = total + discountPerItem;
+
+  return `
+<tr>
+<td class="item">${name}</td>
+<td class="right qty">${qty}</td>
+<td class="right mrp">${lineAmount.toFixed(2)}</td>
+<td class="right disc">₹${lineDiscount.toFixed(2)}</td>
+<td class="right amt">₹${total.toFixed(2)}</td>
+</tr>
+`;
+})
+.join("");
+
+const content = `
+<div class="receipt">
+
+  <h3 class="center">Sri Devi Herbals</h3>
+  <p class="center">Thank You Visit Again</p>
+
+  <hr>
+
+  <p>Invoice : ${order.invoice_number}</p>
+  <p>Date : ${dateTime}</p>
+
+  <hr>
+
+  <table>
+    <thead>
       <tr>
-        <td>Subtotal</td>
-        <td class="right">₹${order.subtotal}</td>
-      </tr>
+<th class="item">Item</th>
+<th class="right qty">Qty</th>
+<th class="right mrp">MRP</th>
+<th class="right disc">Disc</th>
+<th class="right amt">Amt</th>
+</tr>
+    </thead>
 
-      <tr>
-        <td>GST</td>
-        <td class="right">₹${order.tax_total}</td>
-      </tr>
+    <tbody>
+      ${itemsHtml}
+    </tbody>
 
-      <tr>
-        <td><b>Total</b></td>
-        <td class="right"><b>₹${order.grand_total}</b></td>
-      </tr>
-    </table>
+  </table>
 
-    <hr>
+  <hr>
 
-    <p class="center">Powered by Sri Devi Herbals POS</p>
-  </div>
-  `;
+  <table>
 
-  const printFrame = document.createElement("iframe");
-  printFrame.style.position = "fixed";
-  printFrame.style.right = "0";
-  printFrame.style.bottom = "0";
-  printFrame.style.width = "0";
-  printFrame.style.height = "0";
-  printFrame.style.border = "0";
 
-  document.body.appendChild(printFrame);
 
-  const doc = printFrame.contentWindow.document;
 
-  doc.open();
-  doc.write(`
-  <html>
-  <head>
-    <style>
+    <tr>
+      <td>Subtotal</td>
+      <td class="right">₹${order.subtotal}</td>
+    </tr>
 
-      body{
-        font-family: monospace;
-        width:78mm;
-        margin:0;
-        padding:10px;
-      }
+    <tr>
+      <td>Product Discount</td>
+      <td class="right">₹${order.discount_total ?? 0}</td>
+    </tr>
 
-      .center{
-        text-align:center;
-      }
+    <tr>
+      <td>Bill Discount</td>
+      <td class="right">₹${order.billed_discount ?? 0}</td>
+    </tr>
 
-      table{
-        width:100%;
-        font-size:12px;
-      }
+    <tr>
+      <td>GST</td>
+      <td class="right">₹${order.tax_total ?? 0}</td>
+    </tr>
 
-      td{
-        padding:3px 0;
-      }
+    <tr class="total">
+      <td><b>Total</b></td>
+      <td class="right"><b>₹${order.grand_total}</b></td>
+    </tr>
 
-      .right{
-        text-align:right;
-      }
+  </table>
 
-      hr{
-        border:none;
-        border-top:1px dashed black;
-        margin:6px 0;
-      }
+  <hr>
 
-    </style>
-  </head>
+  <p class="center">Powered by Sri Devi Herbals POS</p>
 
-  <body>
-    ${content}
-  </body>
+</div>
+`;
 
-  </html>
-  `);
+const printFrame = document.createElement("iframe");
+printFrame.style.position = "fixed";
+printFrame.style.right = "0";
+printFrame.style.bottom = "0";
+printFrame.style.width = "0";
+printFrame.style.height = "0";
+printFrame.style.border = "0";
 
-  doc.close();
+document.body.appendChild(printFrame);
 
-  printFrame.contentWindow.focus();
-  printFrame.contentWindow.print();
+const doc = printFrame.contentWindow.document;
 
-  setTimeout(() => {
-    document.body.removeChild(printFrame);
-  }, 1000);
+doc.open();
+doc.write(
+`
+<html>
+<head>
+
+<style>
+
+body{
+font-family: monospace;
+width:78mm;
+margin:0;
+padding:8px;
+font-size:12px;
+}
+
+.header{
+text-align:center;
+}
+
+.store{
+font-size:16px;
+font-weight:bold;
+}
+
+.tagline{
+font-size:11px;
+margin-top:2px;
+}
+
+.meta{
+margin-top:6px;
+font-size:11px;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+table-layout:fixed;
+margin-top:5px;
+}
+
+th, td{
+padding:3px 2px;
+white-space:nowrap;
+}
+
+.item{
+width:38%;
+overflow:hidden;
+text-overflow:ellipsis;
+}
+
+.qty{
+width:8%;
+}
+
+.mrp{
+width:19%;
+}
+
+.disc{
+width:19%;
+}
+
+.amt{
+width:19%;
+}
+
+.right{
+text-align:right;
+}
+
+hr{
+border:none;
+border-top:1px dashed black;
+margin:6px 0;
+}
+
+.summary td{
+padding:2px 0;
+}
+
+.total{
+font-weight:bold;
+border-top:1px dashed black;
+}
+
+.footer{
+text-align:center;
+font-size:10px;
+margin-top:6px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="header">
+<div class="store">Sri Devi Herbals</div>
+<div class="tagline">Thank You Visit Again</div>
+</div>
+
+<hr>
+
+<div class="meta">
+Invoice : ${order.invoice_number}<br>
+Date : ${dateTime}<br>
+Customer : ${customerName}<br>
+Phone : ${customerPhone}<br>
+${address ? `Address : ${address}<br>` : ""}
+Payment : ${order.payment_method ?? "Cash"}
+</div>
+
+<hr>
+
+<table>
+<thead>
+<tr>
+<th class="item">Item</th>
+<th class="right qty">Qty</th>
+<th class="right mrp">MRP</th>
+<th class="right disc">Disc</th>
+<th class="right amt">Amt</th>
+</tr>
+</thead>
+
+<tbody>
+${itemsHtml}
+</tbody>
+</table>
+
+<hr>
+
+<table class="summary">
+
+<tr>
+<td>Subtotal</td>
+<td class="right">₹${order.subtotal}</td>
+</tr>
+
+<tr>
+<td>Product Discount</td>
+<td class="right">₹${order.discount_total ?? 0}</td>
+</tr>
+
+<tr>
+<td>Bill Discount</td>
+<td class="right">₹${order.billed_discount ?? 0}</td>
+</tr>
+
+<tr>
+<td>GST</td>
+<td class="right">₹${order.tax_total ?? 0}</td>
+</tr>
+<tr>
+<td>Delivery Fee</td>
+<td class="right">₹${Number(order.change_amount ?? 0).toFixed(2)}</td>
+</tr>
+
+<tr class="total">
+<td>Total</td>
+<td class="right">₹${order.grand_total}</td>
+</tr>
+
+</table>
+
+<hr>
+
+<div class="footer">
+Powered by Sri Devi Herbals POS
+</div>
+
+</body>
+
+</html>
+`
+
+
+
+  
+);
+
+doc.close();
+
+printFrame.contentWindow.focus();
+printFrame.contentWindow.print();
+
+setTimeout(() => {
+  document.body.removeChild(printFrame);
+}, 1000);
 };

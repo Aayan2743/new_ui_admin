@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 export default function VariationModal({ open, product, onClose, onConfirm }) {
   const [selected, setSelected] = useState(null);
 
-   console.log("Variants:", product?.variants);
+   console.log("Variants: dfdfdfdfdfdf", product?.variants);
   useEffect(() => {
     if (!open) setSelected(null);
   }, [open]);
@@ -54,7 +54,7 @@ export default function VariationModal({ open, product, onClose, onConfirm }) {
             onClick={onClose}
             className="flex-1 border rounded-xl py-2 text-sm"
           >
-            Cancel
+            Cancel 
           </button>
 
           <button
@@ -73,6 +73,9 @@ export default function VariationModal({ open, product, onClose, onConfirm }) {
 /* ================= VARIANT ROW ================= */
 
 function VariantRow({ variant, active, onSelect }) {
+
+
+  console.log("Variant :", variant);
   const images = variant.images || [];
   const [index, setIndex] = useState(0);
   const timerRef = useRef(null);
@@ -135,7 +138,25 @@ function VariantRow({ variant, active, onSelect }) {
       </div>
 
       {/* PRICE */}
-      <p className="font-semibold text-sm">₹ {variant.price ?? 0}</p>
+      {/* <p className="font-semibold text-sm">₹ {variant.price ?? 0}</p> */}
+
+
+      <div className="text-right">
+  {/* MRP */}
+  <p className="text-xs text-gray-400 line-through">
+    ₹ {variant.MRP ?? 0}
+  </p>
+
+  {/* Discount */}
+  <p className="text-xs text-green-600">
+    Discount: ₹ {variant.discount ?? 0}
+  </p>
+
+  {/* Final Price */}
+  <p className="font-semibold text-sm">
+    ₹ {variant.price ?? 0}
+  </p>
+</div>
     </button>
   );
 }

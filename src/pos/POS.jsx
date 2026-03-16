@@ -105,6 +105,7 @@ const searchByBarcode = async (code) => {
     const product = res.data;
     const variant = product.variants[0];
 
+    console.log("Product found by barcode:", variant);
     const productData = {
       id: product.id,
       name: product.name
@@ -112,6 +113,7 @@ const searchByBarcode = async (code) => {
 
     setSelectedProduct(productData);
 
+    
     addVariantToCart(productData, variant);
 
   } catch (err) {
@@ -132,7 +134,8 @@ const searchByBarcode = async (code) => {
 const addVariantToCart = (product, variant) => {
 
 
-    console.log("Variant data:", variant);
+
+    console.log("Variant data:", variant.MRP, variant.price, variant.discount);
   if (variant.stock <= 0) {
     alert("Out of stock");
     return;
@@ -164,6 +167,8 @@ const addVariantToCart = (product, variant) => {
         variation_id: variant.id,
         variation_name: variant.name,
         price: variant.price,
+        MRP: variant.MRP,
+        discount: variant.discount,
         stock: variant.stock,
         qty: 1,
       },
@@ -313,6 +318,8 @@ const handleBarcodeKeyDown = (e) => {
           variation_id: variant.id,
           variation_name: variant.name,
           price: variant.price,
+           MRP: variant.MRP,
+    discount: variant.discount,
           stock: variant.stock,
           qty: 1,
         },

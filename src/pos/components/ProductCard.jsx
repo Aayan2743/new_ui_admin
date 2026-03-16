@@ -45,7 +45,7 @@ export default function ProductCard({ product, onClick }) {
           />
         ) : (
           <div className="h-full flex items-center justify-center text-gray-400 text-sm">
-            No Image
+            No Image 
           </div>
         )}
       </div>
