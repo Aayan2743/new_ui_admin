@@ -172,10 +172,10 @@ th, td{
   text-overflow:ellipsis;
 }
 
-.qty{ width:8%; }
-.mrp{ width:17%; }
-.disc{ width:16%; }
-.amt{ width:17%; }
+.qty{ width:5%; }
+.mrp{ width:20%; }
+.disc{ width:20%; }
+.amt{ width:20%; }
 
 .right{
   text-align:right;
@@ -265,7 +265,7 @@ ${itemsHtml}
 
 <tr>
   <td>Delivery Charges</td>
-  <td class="right">₹${Number(order.change_amount || 0).toFixed(2)}</td>
+  <td class="right">₹${Number(order.delivery_charge || 0).toFixed(2)}</td>
 </tr>
 
 <tr>
@@ -544,8 +544,8 @@ Powered by Sri Devi Herbals POS
             </div>
 
             <div className="flex justify-between">
-              <span>Change</span>
-              <span>₹ {order.change_amount}</span>
+              <span>Delivery Fee</span>
+              <span>₹ {order.delivery_charge}</span>
             </div>
 
           </div>

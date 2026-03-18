@@ -312,6 +312,26 @@ const resetCourier = async (orderId) => {
 
 };
 
+
+const cancelOrder = async (orderId) => {
+  try {
+
+    if (!window.confirm("Are you sure you want to cancel this order?")) return;
+
+    const res = await api.post(`/admin-dashboard/cancel-courier/${orderId}`);
+
+    if (res.data.success) {
+      setSuccess("Order cancelled successfully");
+      fetchOrders();
+    } else {
+      setError(res.data.message);
+    }
+
+  } catch (err) {
+    setError("Cancel failed");
+  }
+};
+
 const indexOfLastRate = ratePage * ratePerPage;
 const indexOfFirstRate = indexOfLastRate - ratePerPage;
 
@@ -462,7 +482,26 @@ const totalRatePages = Math.ceil(rates.length / ratePerPage);
                     <td className="px-4 py-3 text-gray-700">{order.customer_phone}</td>
                     <td className="px-4 py-3">{getCustomerTypeBadge(order)} </td>
                     <td className="px-4 py-3 font-semibold text-gray-900">₹ {parseFloat(order.grand_total).toFixed(2)}</td>
-                    <td className="px-4 py-3">{getStatusBadge(order.status)} </td>
+                    {/* <td className="px-4 py-3">{getStatusBadge(order.status)} </td> */}
+
+
+                    <td className="px-4 py-3">
+  <div className="flex flex-col gap-1">
+    {getStatusBadge(order.status)}
+
+    {order.tracking_number && (
+      <div className="text-xs text-gray-600">
+        <span className="font-medium">Tracking:</span> {order.awb_no}
+      </div>
+    )}
+
+    {order.shipping_partner && (
+      <div className="text-xs text-gray-600">
+        <span className="font-medium">Partner:</span> {order.shipping_partner}
+      </div>
+    )}
+  </div>
+</td>
                     <td className="px-4 py-3 text-gray-600">
                       {new Date(order.created_at).toLocaleDateString("en-IN")}
                     </td>
@@ -487,21 +526,31 @@ const totalRatePages = Math.ceil(rates.length / ratePerPage);
   )}
 
   {/* Step 2: After shipped show rate card */}
-  {order.status === "shipped" && (
-    <button
-      onClick={() => fetchRates(order)}
-      className="px-3 py-1 bg-purple-500 hover:bg-purple-600 text-white rounded-lg text-xs font-medium transition"
-    >
-      Rate Card
-    </button>
-  )}
+{order.status === "shipped" && !order.awb_no && (
+  <button
+    onClick={() => fetchRates(order)}
+    className="px-3 py-1 bg-purple-500 hover:bg-purple-600 text-white rounded-lg text-xs font-medium transition"
+  >
+    Rate Card
+  </button>
+)}
 
-  {order.status === "shipped" && (
+  {order.status === "shipped" && !order.awb_no &&  (
   <button
     onClick={() => resetCourier(order.id)}
     className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white rounded-lg text-xs"
   >
-    Remove Courier
+    Change Courier
+  </button>
+)}
+
+
+  {order.status === "shipped" && order.awb_no &&  (
+  <button
+    onClick={() => cancelOrder(order.id)}
+    className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white rounded-lg text-xs"
+  >
+    Cancel Order 
   </button>
 )}
 
@@ -717,7 +766,7 @@ const totalRatePages = Math.ceil(rates.length / ratePerPage);
                     onClick={() => shipNow(selectedOrder.tracking_number, courier.id)}
                     className="px-4 py-2 bg-blue-600 text-white rounded-lg text-xs"
                   >
-                    Ship Now  {selectedOrder.tracking_number } - {courier.id}
+                    Ship Now 
                   </button>
                   </td>
 

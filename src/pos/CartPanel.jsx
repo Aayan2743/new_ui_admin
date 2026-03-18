@@ -383,7 +383,7 @@ const resetCartPanel = () => {
 
             console.log("Receipt printed, resetting cart panel...",orderRes.data.data);
 
-            // window.location.reload();
+            window.location.reload();
             setCart([]);
             setGivenAmount("");
             setBalance(0);
@@ -1425,7 +1425,7 @@ const content = `
     </tr>
 
     <tr>
-      <td>Product Discount</td>
+      <td>Product Discount  </td>
       <td class="right">₹${order.discount_total ?? 0}</td>
     </tr>
 
@@ -1609,12 +1609,12 @@ ${itemsHtml}
 </tr>
 
 <tr>
-<td>Product Discount</td>
+<td>Product Discount (-)</td>
 <td class="right">₹${order.discount_total ?? 0}</td>
 </tr>
 
 <tr>
-<td>Bill Discount</td>
+<td>Bill Discount (-)</td>
 <td class="right">₹${order.billed_discount ?? 0}</td>
 </tr>
 
@@ -1623,8 +1623,8 @@ ${itemsHtml}
 <td class="right">₹${order.tax_total ?? 0}</td>
 </tr>
 <tr>
-<td>Delivery Fee</td>
-<td class="right">₹${Number(order.change_amount ?? 0).toFixed(2)}</td>
+<td>Delivery Fee (+)</td>
+<td class="right">₹${Number(order.delivery_charge ?? 0).toFixed(2)}</td>
 </tr>
 
 <tr class="total">
