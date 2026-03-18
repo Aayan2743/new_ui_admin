@@ -25,6 +25,7 @@ import POSOrders from "./pages/POSOrders";
 import POSOrderView from "./pages/POSOrderView";
 import CustomerCombinedReport from "./pages/CustomerCombinedReport";
 import StaffAttendanceCalendar from "./pages/StaffAttendanceCalendar";
+
 import AddCategory from "./pages/AddCategory";
 import CustomerManagement from "./pages/CustomerManagement";
 import CustomerOrders from "./pages/CustomerOrders";
@@ -58,6 +59,7 @@ import MyAttendance from "./pages/MyAttendance";
 
 import BulkVariantImages from "./pages/BulkVariantImages";
 import BulkAddVariation from "./pages/BulkAddVariation";
+import WhatsappChat from "./pages/WhatsappChat";
 
 
 function AppRoutes() {
@@ -144,6 +146,15 @@ function AppRoutes() {
                   path="/staff-attendance"
                   element={<StaffAttendanceCalendar />}
                 />
+
+
+                 <Route
+                  path="/my-whatsapp"
+                  element={<WhatsappChat />}
+                />
+
+
+             
                 <Route path="/online-orders" element={<OrdersPage />} />
 
                 {/* SETTINGS */}

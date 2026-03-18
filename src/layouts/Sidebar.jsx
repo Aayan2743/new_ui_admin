@@ -197,6 +197,7 @@ import {
   Package,
   Settings,
   Users,
+
 } from "lucide-react";
 import { useProfile } from "../context/ProfileContext";
 import { useLogoSettings } from "../context/LogoSettingsContext";
@@ -325,6 +326,12 @@ export default function Sidebar({ open, setOpen, logout }) {
                     to="/settings/profile"
                     icon={Settings}
                     label="Settings"
+                  />
+
+                   <Item
+                    to="/my-whatsapp"
+                    icon={Users}
+                    label="my whatsapp"
                   />
                 </>
               )}

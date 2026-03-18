@@ -17,6 +17,8 @@ const menu = [
   { label: "Shipping-settings", path: "/settings/shipping-settings" },
   { label: "Product Sections", path: "/settings/product-sections" },
 
+    { label: "My Whats App", path: "/my-whatsapp" },
+
   {
     label: "Footer Sections",
     children: [
