@@ -26,6 +26,8 @@ export default function BulkVariantImages() {
 
   const [uploading, setUploading] = useState(false);
 
+  const [selectedBarcodes, setSelectedBarcodes] = useState([]);
+
   /* ================= FETCH ================= */
 
   const openBarcodePopup = (variant) => {
@@ -38,13 +40,23 @@ export default function BulkVariantImages() {
   };
 
   const printSingleBarcode = async (barcode) => {
+
+    console.log(barcode.barcode);
     const res = await api.get(
-      `/admin-dashboard/product/print-single-barcode/${barcode}`,
+      `/admin-dashboard/product/print-single-barcode/${barcode.barcode}`,
       { responseType: "text" },
     );
 
     sendToPrinter(res.data);
   };
+
+  const toggleBarcode = (barcode) => {
+  setSelectedBarcodes((prev) =>
+    prev.includes(barcode)
+      ? prev.filter((b) => b !== barcode)
+      : [...prev, barcode]
+  );
+};
 
   const printBarcode = async (variantId) => {
     const res = await api.get(
@@ -216,6 +228,40 @@ export default function BulkVariantImages() {
       setUploading(false);
     }
   };
+
+
+  const printSelectedBarcodes = async () => {
+  if (selectedBarcodes.length === 0) {
+    alert("Select at least one barcode");
+    return;
+  }
+
+  try {
+    for (let barcode of selectedBarcodes) {
+      const res = await api.get(
+        `/admin-dashboard/product/print-single-barcode/${barcode}`,
+        { responseType: "text" }
+      );
+
+      await sendToPrinter(res.data);
+    }
+
+    // 🔥 update UI count
+    setBarcodeList(prev =>
+      prev.map(b =>
+        selectedBarcodes.includes(b.barcode)
+          ? { ...b, print_count: b.print_count + 1 }
+          : b
+      )
+    );
+
+    setSelectedBarcodes([]);
+
+  } catch (err) {
+    console.error(err);
+    alert("Bulk print failed");
+  }
+};
 
   return (
     <div className="space-y-6">
@@ -528,6 +574,16 @@ export default function BulkVariantImages() {
             </div>
 
             <div className="space-y-2 text-sm">
+
+
+               <div className="flex justify-between mb-3">
+    <button
+      onClick={printSelectedBarcodes}
+      className="bg-indigo-600 text-white px-4 py-1 rounded text-sm"
+    >
+      Print Selected ({selectedBarcodes.length})
+    </button>
+  </div>
               {barcodeList.length === 0 && <p>No barcodes</p>}
 
               {/* {barcodeList.map((b, i) => (
@@ -536,15 +592,30 @@ export default function BulkVariantImages() {
                 </div>
               ))} */}
 
-              {barcodeList.map((b, i) => (
+            {barcodeList.map((b, i) => (
                 <div
                   key={i}
                   className="border px-3 py-2 rounded flex justify-between items-center"
                 >
-                  <span>{b}</span>
+                  <div className="flex items-center gap-2">
+                    {/* ✅ Checkbox */}
+                    <input
+                      type="checkbox"
+                      checked={selectedBarcodes.includes(b.barcode)}
+                      onChange={() => toggleBarcode(b.barcode)}
+                    />
+
+                    {/* Barcode + Count */}
+                    <span>
+                      {b.barcode}
+                      <span className="ml-2 text-xs text-gray-500">
+                        ({b.print_count})
+                      </span>
+                    </span>
+                  </div>
 
                   <button
-                    onClick={() => printSingleBarcode(b)}
+                    onClick={() => printSingleBarcode(b.barcode)}
                     className="bg-green-100 px-3 py-1 rounded text-xs"
                   >
                     Print

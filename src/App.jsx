@@ -60,6 +60,7 @@ import MyAttendance from "./pages/MyAttendance";
 import BulkVariantImages from "./pages/BulkVariantImages";
 import BulkAddVariation from "./pages/BulkAddVariation";
 import WhatsappChat from "./pages/WhatsappChat";
+import CategorySorter from "./pos/components/CategorySorter";
 
 
 function AppRoutes() {
@@ -152,6 +153,15 @@ function AppRoutes() {
                   path="/my-whatsapp"
                   element={<WhatsappChat />}
                 />
+
+
+                <Route
+                  path="/category-sorter"
+                  element={<CategorySorter />}
+                />
+
+
+                
 
 
              

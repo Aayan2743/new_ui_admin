@@ -304,6 +304,16 @@ export default function Sidebar({ open, setOpen, logout }) {
                     icon={Tag}
                     label="Add Category"
                   />
+
+                    <Item
+                    to="/category-sorter"
+                    icon={Tag}
+                    label="Sort Category"
+                  />
+
+
+
+                  
                   <Item to="/pos" icon={ShoppingCart} label="POS" />
                   <Item
                     to="/pos/orders"

@@ -80,6 +80,22 @@ export default function AddCategory() {
     }
   };
 
+
+  const handleToggle = async (id, type) => {
+  try {
+    await api.post("/admin-dashboard/toggle-category", {
+      id,
+      type, // "pos" or "ecom"
+    });
+
+    // refresh data
+    fetchCategories();
+
+  } catch (e) {
+    alert("Toggle failed");
+  }
+};
+
   return (
     <div className="space-y-6">
       {/* ================= HEADER ================= */}
@@ -121,6 +137,8 @@ export default function AddCategory() {
               <th className="p-3 text-left">Image</th>
               <th className="p-3 text-left">Category</th>
               <th className="p-3 text-left">Action</th>
+              <th className="p-3 text-left">POS</th>  
+              <th className="p-3 text-left">Ecom</th>
             </tr>
           </thead>
 
@@ -154,6 +172,24 @@ export default function AddCategory() {
                     >
                       Delete
                     </button>
+                  </td>
+
+                  <td className="p-3">
+                   <input
+  type="checkbox"
+checked={cat.is_active_pos == 1}
+  onChange={() => handleToggle(cat.id, "pos")}
+/>
+                  </td>
+
+                  <td className="p-3">
+                   <input
+  type="checkbox" 
+
+
+  checked={cat.is_active_ecom == 1}
+  onChange={() => handleToggle(cat.id, "ecom")}
+/>
                   </td>
                 </tr>
               ))
