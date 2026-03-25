@@ -168,7 +168,7 @@ export default function CartPanel({ cart = [], setCart }) {
 
           printReceipt(order);
 
-      window.location.reload();
+     // window.location.reload();
       
           setCart([]);
           setShowPaymentDone(false);
@@ -555,7 +555,7 @@ const resetCartPanel = () => {
         phone: "",
       });
 
-      window.location.reload();
+      // window.location.reload();
 
       setCart([]);
       setShowOtpModal(false);
@@ -1364,6 +1364,7 @@ const itemsHtml = (order.items || [])
       : item.product_name;
 
   const qty = Number(item.qty ?? item.quantity ?? 1);
+  const HSN = item.hsn ?? item.hsn ?? N/A;
   const discountPerItem = Number(item.total_discount ?? 0);
   const total = Number(item.total ?? 0);
 
@@ -1373,6 +1374,7 @@ const itemsHtml = (order.items || [])
   return `
 <tr>
 <td class="item">${name}</td>
+<td class="item">${HSN}</td>
 <td class="right qty">${qty}</td>
 <td class="right mrp">${lineAmount.toFixed(2)}</td>
 <td class="right disc">₹${lineDiscount.toFixed(2)}</td>
@@ -1399,6 +1401,7 @@ const content = `
     <thead>
       <tr>
 <th class="item">Item</th>
+<th class="item">HSN</th>
 <th class="right qty">Qty</th>
 <th class="right mrp">MRP</th>
 <th class="right disc">Disc</th>
@@ -1417,6 +1420,10 @@ const content = `
   <table>
 
 
+    <tr>
+      <td>Subtotal</td>
+      <td class="right">₹${order.subtotal}</td>
+    </tr>
 
 
     <tr>
@@ -1513,7 +1520,14 @@ white-space:nowrap;
 }
 
 .item{
-width:38%;
+width:32%;
+overflow:hidden;
+text-overflow:ellipsis;
+}
+
+
+.hsn{
+width:15%;
 overflow:hidden;
 text-overflow:ellipsis;
 }
@@ -1587,6 +1601,7 @@ Payment : ${order.payment_method ?? "Cash"}
 <thead>
 <tr>
 <th class="item">Item</th>
+<th class="hsn">HSN</th>
 <th class="right qty">Qty</th>
 <th class="right mrp">MRP</th>
 <th class="right disc">Disc</th>

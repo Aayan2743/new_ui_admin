@@ -33,6 +33,8 @@ const EditStepVariation = forwardRef(
       });
 
       existingCombinations.forEach((combo) => {
+
+        console.log("combo",combo)
         if (!Array.isArray(combo.combination_values)) return;
 
         // 🔥 IMPORTANT: numeric sort for key consistency
@@ -72,6 +74,7 @@ const EditStepVariation = forwardRef(
           qty: combo.quantity ?? "",
           low_qty: combo.low_quantity ?? "",
           images: combo.images ?? [],
+          is_returnable: combo.is_returnable ?? 1,
           imagesTouched: false,
         };
       });
@@ -233,6 +236,11 @@ const EditStepVariation = forwardRef(
             fd.append(`variants[${index}][discount]`, row.discount || 0);
             fd.append(`variants[${index}][quantity]`, row.qty || 0);
             fd.append(`variants[${index}][low_quantity]`, row.low_qty || 0);
+
+            fd.append(
+            `variants[${index}][is_returnable]`,
+            row.is_returnable ? 1 : 0
+          );
 
             row.key
               .split("_")

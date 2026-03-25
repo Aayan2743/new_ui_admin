@@ -21,6 +21,20 @@ export default function AddProductDrawer({ open, onClose }) {
   const taxRef = useRef(null);
 
   useEffect(() => {
+  if (!open) {
+    // ✅ Reset everything when drawer closes
+    setStep(1);
+    setProductId(null);
+
+    // optional (safe cleanup)
+    galleryRef.current = null;
+    variationRef.current = null;
+    metaRef.current = null;
+    taxRef.current = null;
+  }
+}, [open]);
+
+  useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "auto";
     return () => (document.body.style.overflow = "auto");
   }, [open]);

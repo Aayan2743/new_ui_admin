@@ -216,10 +216,11 @@ export default function EditVariantTable({
               <th className="px-3 py-2 text-left">Variant</th>
               <th className="px-3 py-2">Purchase Price</th>
               <th className="px-3 py-2">Selling Price</th>
-              <th className="px-3 py-2">Discount (%)</th>
-              <th className="px-3 py-2">SKU</th>
+              <th className="px-3 py-2">Discount (Rs)</th>
+              <th className="px-3 py-2">HSN</th>
               <th className="px-3 py-2">Qty</th>
               <th className="px-3 py-2">Low Qty</th>
+              <th className="px-3 py-2">Returnable</th>
               <th className="px-3 py-2">Images</th>
             </tr>
           </thead>
@@ -289,6 +290,33 @@ export default function EditVariantTable({
                     }
                   />
                 </td>
+
+
+<td className="px-3 py-2 text-center">
+  <label className="inline-flex items-center cursor-pointer">
+    <input
+      type="checkbox"
+      className="sr-only peer"
+      checked={Number(row.is_returnable) === 1}
+      onChange={(e) =>
+        update(rowIndex, "is_returnable", e.target.checked ? 1 : 0)
+      }
+    />
+
+    <div className="
+      w-11 h-6 flex items-center
+      rounded-full p-1
+      transition-all
+      bg-red-400 peer-checked:bg-green-500
+    ">
+      <div className="
+        w-4 h-4 bg-white rounded-full
+        transform transition
+        translate-x-0 peer-checked:translate-x-5
+      "></div>
+    </div>
+  </label>
+</td>
 
                 <td className="px-3 py-2">
                   <input

@@ -35,13 +35,19 @@ export default function BulkVariantImages() {
     setBarcodePopup(true);
   };
 
+
+
+
+
+
   const closeBarcodePopup = () => {
     setBarcodePopup(false);
+      setSelectedBarcodes([]); 
   };
 
   const printSingleBarcode = async (barcode) => {
 
-    console.log(barcode.barcode);
+    console.log(barcode);
     const res = await api.get(
       `/admin-dashboard/product/print-single-barcode/${barcode.barcode}`,
       { responseType: "text" },
@@ -49,6 +55,41 @@ export default function BulkVariantImages() {
 
     sendToPrinter(res.data);
   };
+
+
+
+const printSingleBarcodeOneByOne = async (barcode) => {
+  try {
+    const res = await api.get(
+      `/admin-dashboard/product/print-single-barcode/${barcode}`,
+      { responseType: "text" }
+    );
+
+    // ✅ First print
+    const printed = sendToPrinter(res.data);
+
+    // 👉 Only update if print successful
+    if (printed !== false) {
+     setBarcodeList((prevList) =>
+  prevList.map((item) =>
+    item.barcode === barcode
+      ? {
+          ...item,
+          print_count: (parseInt(item.print_count) || 0) + 1,
+        }
+      : item
+  )
+);
+    }
+
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+
+
+
 
   const toggleBarcode = (barcode) => {
   setSelectedBarcodes((prev) =>
@@ -58,18 +99,49 @@ export default function BulkVariantImages() {
   );
 };
 
+  // const printBarcode = async (variantId) => {
+  //   const res = await api.get(
+  //     `/admin-dashboard/product/print-barcode/${variantId}`,
+  //     {
+  //       responseType: "text",
+  //     },
+  //   );
+
+  //   const tspl = res.data;
+
+  //   sendToPrinter(tspl);
+  // };
+
   const printBarcode = async (variantId) => {
+  try {
     const res = await api.get(
       `/admin-dashboard/product/print-barcode/${variantId}`,
-      {
-        responseType: "text",
-      },
+      { responseType: "text" }
     );
 
     const tspl = res.data;
 
-    sendToPrinter(tspl);
-  };
+    // ✅ Send to printer
+    const printed = sendToPrinter(tspl);
+
+    // ✅ Only update if print success
+    if (printed !== false) {
+      setBarcodeList((prevList) =>
+        prevList.map((item) =>
+          item.variant_id === variantId
+            ? {
+                ...item,
+                print_count: (parseInt(item.print_count) || 0) + 1,
+              }
+            : item
+        )
+      );
+    }
+
+  } catch (err) {
+    console.error("Print error:", err);
+  }
+};
 
   const sendToPrinter = async (tspl) => {
     try {
@@ -263,6 +335,30 @@ export default function BulkVariantImages() {
   }
 };
 
+
+
+const handleToggleReturn = async (variant) => {
+  try {
+    const newValue = !variant.is_returnable;
+
+    await api.post(`/admin-dashboard/product/toggle-returnable/${variant.id}`, {
+      is_returnable: newValue ? 1 : 0,
+    });
+
+    // ✅ update UI instantly
+    setVariants((prev) =>
+      prev.map((v) =>
+        v.id === variant.id
+          ? { ...v, is_returnable: newValue }
+          : v
+      )
+    );
+  } catch (err) {
+    console.error(err);
+    alert("Failed to update");
+  }
+};
+
   return (
     <div className="space-y-6">
       {/* HEADER */}
@@ -324,6 +420,7 @@ export default function BulkVariantImages() {
             <tr>
               <th className="px-4 py-3">#</th>
               <th className="px-4 py-3">Product</th>
+              <th className="px-4 py-3">Is_Returnable</th>
               <th className="px-4 py-3">Variant</th>
               <th className="px-4 py-3">SKU</th>
               <th className="px-4 py-3">Qty</th>
@@ -350,6 +447,34 @@ export default function BulkVariantImages() {
 
                   <td className="px-4 py-3 font-medium">{v.product_name}</td>
 
+                {/* <td className="px-4 py-3 font-medium">
+  {v.is_returnable ? "Yes" : "No"} dfdfdf
+</td> */}
+
+
+<td className="px-4 py-3 text-center">
+  <label className="inline-flex items-center cursor-pointer">
+    <input
+      type="checkbox"
+      className="sr-only peer"
+      checked={v.is_returnable === true}
+      onChange={() => handleToggleReturn(v)}
+    />
+
+    <div className="
+      w-11 h-6 flex items-center
+      bg-red-400 rounded-full p-1
+      peer-checked:bg-green-500
+      transition-all
+    ">
+      <div className="
+        w-4 h-4 bg-white rounded-full
+        transform transition
+        peer-checked:translate-x-5
+      "></div>
+    </div>
+  </label>
+</td>
                   <td className="px-4 py-3">
                     {v.variation_values?.join(" / ") || "-"}
                   </td>
@@ -615,7 +740,7 @@ export default function BulkVariantImages() {
                   </div>
 
                   <button
-                    onClick={() => printSingleBarcode(b.barcode)}
+                    onClick={() => printSingleBarcodeOneByOne(b.barcode)}
                     className="bg-green-100 px-3 py-1 rounded text-xs"
                   >
                     Print

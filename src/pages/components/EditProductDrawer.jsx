@@ -36,6 +36,7 @@ export default function EditProductDrawer({ open, onClose, productId }) {
           `/admin-dashboard/product/fetch-products-by-id/${productId}`,
         );
 
+        console.log("product complete",res.data.data)
         setProduct(res.data.data);
       } catch (err) {
         console.error("Failed to fetch product", err);

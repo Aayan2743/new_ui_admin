@@ -29,6 +29,27 @@ export default function ManualOrderDetails() {
     }
   };
 
+
+  const updateStatus = async (status) => {
+  try {
+    const res = await api.post(
+      `/admin-dashboard/order/update-status/${order.id}`,
+      { status }
+    );
+
+    if (res.data.success) {
+      // ✅ update UI instantly
+      setOrder((prev) => ({
+        ...prev,
+        status: status,
+      }));
+    }
+  } catch (err) {
+    console.error(err);
+    alert("Failed to update status");
+  }
+};
+
   if (loading) return <p className="p-6">Loading...</p>;
   if (!order) return <p className="p-6">No Order Found</p>;
 
@@ -417,11 +438,32 @@ Powered by Sri Devi Herbals POS
           >
             ← Back
           </button>
+<div className="text-right">
+  <h2 className="text-2xl font-bold">{order.invoice_number}</h2>
 
-          <div className="text-right">
-            <h2 className="text-2xl font-bold">{order.invoice_number}</h2>
-            {getStatusBadge(order.status)}
-          </div>
+  {/* STATUS BADGE (always visible) */}
+  {getStatusBadge(order.status)}
+
+  {/* DROPDOWN ONLY FOR ON-CALL / WHATSAPP */}
+  {["on-call", "whatsapp"].includes(
+    (order.order_from || "").toLowerCase()
+  ) && (
+    <div className="mt-2">
+      <select
+        value={order.status}
+        onChange={(e) => updateStatus(e.target.value)}
+        className="border px-3 py-1 rounded text-sm"
+      >
+        <option value="created">Created</option>
+        <option value="picked">Picked</option>
+        <option value="in_transit">In Transit</option>
+        <option value="out_for_delivery">Out for Delivery</option>
+        <option value="completed">Completed</option>
+        <option value="cancelled">Cancelled</option>
+      </select>
+    </div>
+  )}
+</div>
         </div>
 
         {/* PRINT RECEIPT */}

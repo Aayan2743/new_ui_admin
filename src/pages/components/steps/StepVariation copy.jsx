@@ -68,19 +68,72 @@ const StepVariation = forwardRef(({ productId }, ref) => {
     const combos = generateVariants(input);
 
     setVariants(combos);
-    // setVariantData((prev) => combos.map((_, i) => prev[i] || {}));
-
-    setVariantData((prev) =>
-      combos.map((_, i) => ({
-        is_returnable: 1, // default ON
-        ...prev[i],
-      }))
-    );
+    setVariantData((prev) => combos.map((_, i) => prev[i] || {}));
   }, [selected, variations]);
 
   /* ================= SAVE STEP (API INTEGRATION) ================= */
 
-  
+  // useImperativeHandle(ref, () => ({
+  //   async saveStep() {
+  //     if (!productId) {
+  //       alert("Product not created");
+  //       return false;
+  //     }
+
+  //     if (!variants.length) return true;
+
+  //     try {
+  //       setLoading(true);
+
+  //       // ✅ BUILD PAYLOAD FOR API
+  //       const payload = variants.map((label, i) => ({
+  //         variation_value_ids: Object.values(selected)
+  //           .flat()
+  //           .filter((v) => label.includes(v.value))
+  //           .map((v) => v.id),
+
+  //         sku: variantData[i]?.sku || null,
+  //         purchase_price: variantData[i]?.purchase_price || 0, // ✅ NEW
+  //         extra_price: variantData[i]?.price || 0,
+  //         quantity: variantData[i]?.qty || 0,
+  //         low_quantity: variantData[i]?.low_qty || 0,
+  //       }));
+
+  //       // ✅ CREATE VARIANTS
+  //       const res = await api.post(
+  //         `/admin-dashboard/product/create-variation/${productId}`,
+  //         { variants: payload },
+  //       );
+
+  //       const createdVariants = res.data.data || [];
+
+  //       // ✅ UPLOAD VARIANT IMAGES
+  //       for (let i = 0; i < createdVariants.length; i++) {
+  //         const images = variantData[i]?.images;
+  //         if (!images?.length) continue;
+
+  //         const fd = new FormData();
+  //         images.forEach((img) => fd.append("images[]", img));
+
+  //         await api.post(
+  //           `/admin-dashboard/product/variant/${createdVariants[i].id}/ `,
+  //           fd,
+  //           {
+  //             headers: { "Content-Type": "multipart/form-data" },
+  //           },
+  //         );
+  //       }
+
+  //       return true;
+  //     } catch (err) {
+  //       console.error(err);
+  //       alert("Failed to save variants");
+  //       return false;
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   },
+  // }));
 
   useImperativeHandle(ref, () => ({
     async saveStep() {
@@ -108,8 +161,6 @@ const StepVariation = forwardRef(({ productId }, ref) => {
           discount: Number(variantData[i]?.discount || 0),
           quantity: Number(variantData[i]?.qty || 0),
           low_quantity: Number(variantData[i]?.low_qty || 0),
-          is_returnable: Number(variantData[i]?.is_returnable ?? 1),
-
         }));
 
         // 2️⃣ FORM DATA (JSON + IMAGES)

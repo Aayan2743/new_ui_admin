@@ -59,7 +59,6 @@ export default function VariantTable({ variants, data, setData }) {
               <th className="px-3 py-2">HSN</th>
               <th className="px-3 py-2">Qty</th>
               <th className="px-3 py-2">Low Qty</th>
-              <th className="px-3 py-2">Returnable</th>
               <th className="px-3 py-2">Photos</th>
             </tr>
           </thead>
@@ -139,38 +138,6 @@ export default function VariantTable({ variants, data, setData }) {
                   />
                 </td>
 
-                     {/* Return */}
-              
-
-<label className="inline-flex items-center cursor-pointer">
-  <input
-    type="checkbox"
-    className="sr-only peer"
-    checked={Boolean(data[i]?.is_returnable ?? 1)}
-    onChange={(e) =>
-      update(i, "is_returnable", e.target.checked ? 1 : 0)
-    }
-  />
-
-  {/* Track */}
-  <div className="
-    w-11 h-6 flex items-center
-    bg-red-400 rounded-full p-1
-    peer-checked:bg-green-500
-    transition-all duration-300
-  ">
-    {/* Thumb */}
-    <div className="
-      w-4 h-4 bg-white rounded-full shadow-md
-      transform transition-all duration-300
-      translate-x-0 peer-checked:translate-x-5
-    "></div>
-  </div>
-
-  <span className="ml-2 text-sm">
-    {data[i]?.is_returnable ? "ON" : "OFF"}
-  </span>
-</label>  
                 {/* IMAGES */}
                 <td className="px-3 py-2">
                   <input
