@@ -150,6 +150,8 @@ export default function CartPanel({ cart = [], setCart }) {
   };
 
   const checkPaymentStatus = async () => {
+
+    alert("payment link  direct walkin")
     try {
       const res = await api.post("/admin-dashboard/check-payment-link", {
         link_id: paymentLinkId,
@@ -159,7 +161,7 @@ export default function CartPanel({ cart = [], setCart }) {
         alert("Payment Received");
 
         const orderRes = await api.post(
-          "/admin-dashboard/pos/create-order-oncall",
+          "/admin-dashboard/pos/create-order-walking",
           pendingPayload,
         );
 
@@ -182,6 +184,43 @@ export default function CartPanel({ cart = [], setCart }) {
     }
   };
 
+
+  const checkPaymentStatusforOncall = async () => {
+      alert("payment link on call")
+    try {
+      const res = await api.post("/admin-dashboard/check-payment-link", {
+        link_id: paymentLinkId,
+      });
+
+      if (res.data.success) {
+        alert("Payment Received");
+
+        const orderRes = await api.post(
+          "/admin-dashboard/pos/create-order-oncall-orders",
+          pendingPayload,
+        );
+
+        if (orderRes.data.success) {
+          const order = orderRes.data.data;
+
+          printReceipt(order);
+
+     // window.location.reload();
+      
+          setCart([]);
+          setShowPaymentDone(false);
+          setPendingPayload(null);
+        }
+      } else {
+        alert("Payment not completed yet");
+      }
+    } catch (err) {
+      alert("Failed to check payment");
+    }
+  };
+
+
+  
 
   const productDiscount = useMemo(
   () => cart.reduce((sum, item) => sum + (item.discount || 0) * item.qty, 0),
@@ -529,7 +568,54 @@ const resetCartPanel = () => {
 
 
 
-  const handleManualPaymentSuccess = async () => {
+  const handleManualPaymentSuccessOncall = async () => {
+  try {
+    setLoading(true);
+
+    const orderRes = await api.post(
+      "/admin-dashboard/pos/create-order-manually-oncall",
+      pendingPayload
+    );
+
+    if (orderRes.data.success) {
+
+      const order = orderRes.data.data;
+
+      alert(`Order Created: ${order.invoice_number}`);
+
+      // 🔥 PRINT RECEIPT
+      printReceipt(order);
+
+  
+
+
+       setCustomer({
+        name: "",
+        phone: "",
+      });
+
+      // window.location.reload();
+
+      setCart([]);
+      setShowOtpModal(false);
+      setOtp("");
+      setPendingPayload(null);
+      setShowPaymentDone(false);
+
+    } else {
+      alert(orderRes.data.message);
+    }
+
+  } catch (err) {
+    console.log(err.response?.data);
+    alert("Order creation failed");
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+  const handleManualPaymentSuccessWalking = async () => {
   try {
     setLoading(true);
 
@@ -1218,19 +1304,49 @@ const resetCartPanel = () => {
       {/* manulay confirmation */}
       {showPaymentDone && (
         <div className="p-4 border-t space-y-2">
-          <button
+          {/* <button
             onClick={checkPaymentStatus}
             className="w-full bg-blue-600 text-white py-3 rounded-xl"
           >
-            Check Payment
-          </button>
+            Check Payment dfdfdfdfd
+          </button> */}
 
-          <button
-            onClick={handleManualPaymentSuccess}
+        {isOnCallCustomer ? (
+            <button
+              onClick={checkPaymentStatusforOncall}
+              className="w-full bg-purple-600 text-white py-3 rounded-xl"
+            >
+              Verify On-Call Payment
+            </button>
+          ) : (
+            <button
+              onClick={checkPaymentStatus}
+              className="w-full bg-blue-600 text-white py-3 rounded-xl"
+            >
+              Check Payment
+            </button>
+          )}
+
+
+
+
+           {isOnCallCustomer ? (
+             <button
+            onClick={handleManualPaymentSuccessOncall}
             className="w-full bg-green-700 text-white py-3 rounded-xl"
           >
-            Payment Done (Manual)
+            Payment Done  On Call (Manual)
           </button>
+          ) : (
+             <button
+            onClick={handleManualPaymentSuccessWalking}
+            className="w-full bg-green-700 text-white py-3 rounded-xl"
+          >
+            Payment Done Walking (Manual)
+          </button>
+          )}
+
+        
         </div>
       )}
 

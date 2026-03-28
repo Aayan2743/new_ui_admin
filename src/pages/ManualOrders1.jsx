@@ -36,7 +36,7 @@ export default function ManualOrders1() {
       // );
 
           const res = await api.get(
-        `/admin-dashboard/calling/orders-employee?page=${page}&search=${search}`,
+        `/admin-dashboard/calling/employees/orders?page=${page}&search=${search}`,
       );
 
       if (res.data.success) {
@@ -160,14 +160,14 @@ export default function ManualOrders1() {
                     View
                   </button>
 
-                  {order.status === "created" && (
+                  {/* {order.status === "created" && (
                     <button
                       onClick={() => openCourierModal(order)}
                       className="px-3 py-1 bg-blue-500 text-white rounded"
                     >
                       Courier
                     </button>
-                  )}
+                  )} */}
                 </td>
               </tr>
             ))}

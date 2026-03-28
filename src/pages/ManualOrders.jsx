@@ -486,26 +486,26 @@ const totalRatePages = Math.ceil(rates.length / ratePerPage);
 
 
                     <td className="px-4 py-3">
-  <div className="flex flex-col gap-1">
-    {getStatusBadge(order.status)}
+                    <div className="flex flex-col gap-1">
+                      {getStatusBadge(order.status)}
 
-    {order.tracking_number && (
-      <div className="text-xs text-gray-600">
-        <span className="font-medium">Tracking:</span> {order.awb_no}
-      </div>
-    )}
+                      {order.tracking_number && (
+                        <div className="text-xs text-gray-600">
+                          <span className="font-medium">Tracking:</span> {order.awb_no}
+                        </div>
+                      )}
 
-    {order.shipping_partner && (
-      <div className="text-xs text-gray-600">
-        <span className="font-medium">Partner:</span> {order.shipping_partner}
-      </div>
-    )}
-  </div>
-</td>
+                      {order.shipping_partner && (
+                        <div className="text-xs text-gray-600">
+                          <span className="font-medium">Partner:</span> {order.shipping_partner}
+                        </div>
+                      )}
+                    </div>
+                  </td>
                     <td className="px-4 py-3 text-gray-600">
                       {new Date(order.created_at).toLocaleDateString("en-IN")}
                     </td>
-                    <td className="px-4 py-3 text-gray-700">{order?.Employee || "—"}</td>
+                    <td className="px-4 py-3 text-gray-700">{order?.user?.name || "—"}</td>
                     <td className="px-4 py-3 flex gap-2">
 
   <button
