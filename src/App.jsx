@@ -61,7 +61,10 @@ import BulkVariantImages from "./pages/BulkVariantImages";
 import BulkAddVariation from "./pages/BulkAddVariation";
 import WhatsappChat from "./pages/WhatsappChat";
 import CategorySorter from "./pos/components/CategorySorter";
-
+import CardFieldBuilder from "./pages/CardFieldBuilder";
+import TemplatesPage from "./pages/TemplatesPage";
+import CreateTemplatePage from "./pages/CreateTemplatePage";
+import BuilderPage from "./pages/BuilderPage";
 
 function AppRoutes() {
   const { user, loading } = useAuth();
@@ -105,10 +108,7 @@ function AppRoutes() {
             <Route path="/pos" element={<POS />} />
 
             <Route path="/pos/orders" element={<ManualOrders1 />} />
-            <Route
-              path="/calling/order/:id"
-              element={<ManualOrderDetails />}
-            />
+            <Route path="/calling/order/:id" element={<ManualOrderDetails />} />
 
             <Route path="/customers" element={<CustomerManagement />} />
             <Route path="/pos/orders/:id" element={<POSOrderView />} />
@@ -126,14 +126,35 @@ function AppRoutes() {
               <>
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/products" element={<Products />} />
-                <Route path="/add-bulk-variants" element={<BulkAddVariation />} />
-                <Route path="/bulk-variant-images" element={<BulkVariantImages />} />
+                <Route
+                  path="/add-bulk-variants"
+                  element={<BulkAddVariation />}
+                />
+                <Route
+                  path="/card-field-builder"
+                  element={<CardFieldBuilder />}
+                />
+
+                <Route path="/templates" element={<TemplatesPage />} />
+
+                {/* Create Template */}
+                <Route
+                  path="/templates/create"
+                  element={<CreateTemplatePage />}
+                />
+
+                {/* Builder */}
+                <Route
+                  path="/templates/builder/:id"
+                  element={<BuilderPage />}
+                />
+                <Route
+                  path="/bulk-variant-images"
+                  element={<BulkVariantImages />}
+                />
                 <Route path="/add-categories" element={<AddCategory />} />
                 <Route path="/pos" element={<POS />} />
-                <Route
-                  path="/customers"
-                  element={<CustomerManagement />}
-                />
+                <Route path="/customers" element={<CustomerManagement />} />
                 <Route
                   path="/customers/:id/orders"
                   element={<CustomerOrders />}
@@ -148,23 +169,10 @@ function AppRoutes() {
                   element={<StaffAttendanceCalendar />}
                 />
 
+                <Route path="/my-whatsapp" element={<WhatsappChat />} />
 
-                 <Route
-                  path="/my-whatsapp"
-                  element={<WhatsappChat />}
-                />
+                <Route path="/category-sorter" element={<CategorySorter />} />
 
-
-                <Route
-                  path="/category-sorter"
-                  element={<CategorySorter />}
-                />
-
-
-                
-
-
-             
                 <Route path="/online-orders" element={<OrdersPage />} />
 
                 {/* SETTINGS */}
@@ -187,18 +195,9 @@ function AppRoutes() {
                     path="whatsapp-integration"
                     element={<WhatsAppIntegrationSettings />}
                   />
-                  <Route
-                    path="coupons-settings"
-                    element={<CouponSettings />}
-                  />
-                  <Route
-                    path="banner-settings"
-                    element={<BannerSettings />}
-                  />
-                  <Route
-                    path="contact-page"
-                    element={<ContactSettings />}
-                  />
+                  <Route path="coupons-settings" element={<CouponSettings />} />
+                  <Route path="banner-settings" element={<BannerSettings />} />
+                  <Route path="contact-page" element={<ContactSettings />} />
                   <Route
                     path="customer-care-settings"
                     element={<CustomerCareSettings />}
@@ -219,18 +218,9 @@ function AppRoutes() {
                     path="footer-sections/reorder"
                     element={<ProductSectionAssign />}
                   />
-                  <Route
-                    path="pages"
-                    element={<ProductSectionAssign />}
-                  />
-                  <Route
-                    path="blog-categories"
-                    element={<ComingSoon />}
-                  />
-                  <Route
-                    path="blogs"
-                    element={<ComingSoon />}
-                  />
+                  <Route path="pages" element={<ProductSectionAssign />} />
+                  <Route path="blog-categories" element={<ComingSoon />} />
+                  <Route path="blogs" element={<ComingSoon />} />
                   <Route
                     path="landing-banner-settings"
                     element={<BannerSettings />}
@@ -244,7 +234,10 @@ function AppRoutes() {
               <>
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/products" element={<Products />} />
-                 <Route path="/bulk-variant-images" element={<BulkVariantImages />} />
+                <Route
+                  path="/bulk-variant-images"
+                  element={<BulkVariantImages />}
+                />
                 <Route path="/categories" element={<Category />} />
                 <Route
                   path="/staff-attendance"
@@ -275,10 +268,7 @@ function AppRoutes() {
             <Route path="/settings" element={<SettingsPage />}>
               <Route path="profile" element={<ProfileSettings />} />
               <Route path="logo" element={<LogoSettings />} />
-              <Route
-                path="social-media"
-                element={<SocialMediaSettings />}
-              />
+              <Route path="social-media" element={<SocialMediaSettings />} />
               <Route
                 path="payment-gateway"
                 element={<PaymentGatewaySettings />}
@@ -291,26 +281,14 @@ function AppRoutes() {
                 path="whatsapp-integration"
                 element={<WhatsAppIntegrationSettings />}
               />
-              <Route
-                path="coupons-settings"
-                element={<CouponSettings />}
-              />
-              <Route
-                path="banner-settings"
-                element={<BannerSettings />}
-              />
-              <Route
-                path="contact-page"
-                element={<ContactSettings />}
-              />
+              <Route path="coupons-settings" element={<CouponSettings />} />
+              <Route path="banner-settings" element={<BannerSettings />} />
+              <Route path="contact-page" element={<ContactSettings />} />
               <Route
                 path="customer-care-settings"
                 element={<CustomerCareSettings />}
               />
-              <Route
-                path="shipping-settings"
-                element={<ShippingSettings />}
-              />
+              <Route path="shipping-settings" element={<ShippingSettings />} />
               <Route
                 path="product-sections"
                 element={<EditProductSections />}
@@ -323,18 +301,9 @@ function AppRoutes() {
                 path="footer-sections/reorder"
                 element={<ProductSectionAssign />}
               />
-              <Route
-                path="pages"
-                element={<ProductSectionAssign />}
-              />
-              <Route
-                path="blog-categories"
-                element={<ComingSoon />}
-              />
-              <Route
-                path="blogs"
-                element={<ComingSoon />}
-              />
+              <Route path="pages" element={<ProductSectionAssign />} />
+              <Route path="blog-categories" element={<ComingSoon />} />
+              <Route path="blogs" element={<ComingSoon />} />
               <Route
                 path="landing-banner-settings"
                 element={<BannerSettings />}
